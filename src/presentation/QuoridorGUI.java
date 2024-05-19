@@ -268,9 +268,17 @@ public class QuoridorGUI extends JFrame {
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
         
-        // Create the game board grid
-        JPanel boardPanel = new JPanel(new GridLayout(9, 9));
+        JPanel boardPanel = new JPanel(new GridLayout(11, 9));
         JButton[][] boardButtons = new JButton[9][9];
+        
+        JLabel player1Label = new JLabel();
+        player1Label.setHorizontalAlignment(SwingConstants.CENTER);
+        boardPanel.add(player1Label);
+        
+        for (int col = 0; col < 9; col++) {
+            boardPanel.add(new JLabel());
+        }
+        
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 JButton button = new JButton();
@@ -278,40 +286,51 @@ public class QuoridorGUI extends JFrame {
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        // Handle player move
                     }
                 });
                 boardButtons[row][col] = button;
                 boardPanel.add(button);
             }
         }
+        
+        JLabel player2Label = new JLabel();
+        player2Label.setHorizontalAlignment(SwingConstants.CENTER);
+        boardPanel.add(player2Label);
+        
         gameBoardPanel.add(boardPanel, BorderLayout.CENTER);
         
-        // Create player labels
-        JPanel playerPanel = new JPanel(new GridLayout(2, 1));
-        JLabel player1Label = new JLabel();
-        JLabel player2Label = new JLabel();
-        playerPanel.add(player1Label);
-        playerPanel.add(player2Label);
-        gameBoardPanel.add(playerPanel, BorderLayout.WEST);
+        JPanel rightPanel = new JPanel(new GridLayout(2, 1));
         
-        // Create remaining barriers panel
-        JPanel barriersPanel = new JPanel(new GridLayout(2, 1));
-        JLabel remainingBarriersLabel = new JLabel("Remaining Barriers");
-        JPanel buttonsPanel = new JPanel(new GridLayout(1, 4));
-        JButton normalButton = new JButton("Normal");
-        JButton alliedButton = new JButton("Allied");
-        JButton temporaryButton = new JButton("Temporary");
-        JButton largeButton = new JButton("Large");
-        buttonsPanel.add(normalButton);
-        buttonsPanel.add(alliedButton);
-        buttonsPanel.add(temporaryButton);
-        buttonsPanel.add(largeButton);
-        barriersPanel.add(remainingBarriersLabel);
-        barriersPanel.add(buttonsPanel);
-        gameBoardPanel.add(barriersPanel, BorderLayout.EAST);
+        JPanel barrierSelectionPanel = new JPanel(new GridLayout(4, 1));
+        JLabel columnLabel = new JLabel("Column:");
+        JTextField columnTextField = new JTextField();
+        JLabel rowLabel = new JLabel("Row:");
+        JTextField rowTextField = new JTextField();
+        JLabel barrierTypeLabel = new JLabel("Barrier Type:");
+        JComboBox<String> barrierTypeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
+        JButton placeBarrierButton = new JButton("Place Barrier");
+        barrierSelectionPanel.add(columnLabel);
+        barrierSelectionPanel.add(columnTextField);
+        barrierSelectionPanel.add(rowLabel);
+        barrierSelectionPanel.add(rowTextField);
+        barrierSelectionPanel.add(barrierTypeLabel);
+        barrierSelectionPanel.add(barrierTypeComboBox);
+        barrierSelectionPanel.add(placeBarrierButton);
+        rightPanel.add(barrierSelectionPanel);
         
-        // Create turn and timer panel
+        JPanel barrierInformationPanel = new JPanel(new BorderLayout());
+        JLabel remainingBarriersLabel = new JLabel("Remaining Barriers:");
+        JTable barrierTable = new JTable(new String[][]{{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[]{"Barrier Type", "Count"});
+        JScrollPane scrollPane = new JScrollPane(barrierTable);
+        barrierInformationPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
+        barrierInformationPanel.add(scrollPane, BorderLayout.CENTER);
+        rightPanel.add(barrierInformationPanel);
+        
+        gameBoardPanel.add(rightPanel, BorderLayout.EAST);
+        
+        JButton surrenderButton = new JButton("Surrender");
+        gameBoardPanel.add(surrenderButton, BorderLayout.NORTH);
+        
         JPanel turnPanel = new JPanel(new FlowLayout());
         JLabel turnLabel = new JLabel();
         JLabel timerLabel = new JLabel("Time: 00:00");
