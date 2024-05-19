@@ -38,9 +38,14 @@ public class QuoridorGUI extends JFrame {
     private JPanel player1, player2;
     private JTextField name1, name2;
     private JButton ok1,ok2 ;
+    private boolean player1Ready = false;
+    private boolean player2Ready = false;
+    private Color player1Color;
+    private Color player2Color;
 
-    private JPanel game;
-    private JButton forward,left,right,back,leftDiagonal,rightDiagonal,giveUp,put;
+    private JPanel gameBoardPanel;
+    private JButton forward,left,right,back,leftDiagonal,rightDiagonal,giveUp,putBarrier;
+
 
 
 
@@ -68,7 +73,7 @@ public class QuoridorGUI extends JFrame {
         prepareElementsDifficult();
         prepareElementsMode();
         prepareElementsSetPlayers();
-        prepareElementsGame();
+        prepareElementsGameBoard();
 
         setSize(PREFERRED_DIMENSION);
 
@@ -76,9 +81,8 @@ public class QuoridorGUI extends JFrame {
     }
 
     private void prepareElementsInit(){
-        initPanel= new JPanel();
+        initPanel= new JPanel(new GridBagLayout());
 
-        initPanel.setLayout(new GridLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;gbc.gridy = 0;gbc.weightx = 1.0;gbc.weighty = 1.0;gbc.fill = GridBagConstraints.BOTH;
 
@@ -97,11 +101,11 @@ public class QuoridorGUI extends JFrame {
 
         initPanel.setSize(PREFERRED_DIMENSION);
     }
+    
     private void prepareElementsSpace(){
 
-        choseSpace=new JPanel();
+        choseSpace=new JPanel(new GridBagLayout());
 
-        choseSpace.setLayout(new GridLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;gbc.gridy = 0;gbc.weightx = 1.0;gbc.weighty = 1.0;gbc.fill = GridBagConstraints.BOTH;
 
@@ -215,6 +219,7 @@ public class QuoridorGUI extends JFrame {
             colorButton1.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    player1Color = color;
                     selectedColorButton1.setBackground(color);
                 }
             });
@@ -227,6 +232,7 @@ public class QuoridorGUI extends JFrame {
             colorButton2.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    player2Color = color;
                     selectedColorButton2.setBackground(color);
                 }
             });
@@ -259,9 +265,72 @@ public class QuoridorGUI extends JFrame {
 
     
 
-    private void prepareElementsGame(){
-
+    private void prepareElementsGameBoard() {
+        gameBoardPanel = new JPanel(new BorderLayout());
+        
+        // Create the game board grid
+        JPanel boardPanel = new JPanel(new GridLayout(9, 9));
+        JButton[][] boardButtons = new JButton[9][9];
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(60, 60));
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // Handle player move
+                    }
+                });
+                boardButtons[row][col] = button;
+                boardPanel.add(button);
+            }
+        }
+        gameBoardPanel.add(boardPanel, BorderLayout.CENTER);
+        
+        // Create player labels
+        JPanel playerPanel = new JPanel(new GridLayout(2, 1));
+        JLabel player1Label = new JLabel();
+        JLabel player2Label = new JLabel();
+        playerPanel.add(player1Label);
+        playerPanel.add(player2Label);
+        gameBoardPanel.add(playerPanel, BorderLayout.WEST);
+        
+        // Create remaining barriers panel
+        JPanel barriersPanel = new JPanel(new GridLayout(2, 1));
+        JLabel remainingBarriersLabel = new JLabel("Remaining Barriers");
+        JPanel buttonsPanel = new JPanel(new GridLayout(1, 4));
+        JButton normalButton = new JButton("Normal");
+        JButton alliedButton = new JButton("Allied");
+        JButton temporaryButton = new JButton("Temporary");
+        JButton largeButton = new JButton("Large");
+        buttonsPanel.add(normalButton);
+        buttonsPanel.add(alliedButton);
+        buttonsPanel.add(temporaryButton);
+        buttonsPanel.add(largeButton);
+        barriersPanel.add(remainingBarriersLabel);
+        barriersPanel.add(buttonsPanel);
+        gameBoardPanel.add(barriersPanel, BorderLayout.EAST);
+        
+        // Create turn and timer panel
+        JPanel turnPanel = new JPanel(new FlowLayout());
+        JLabel turnLabel = new JLabel();
+        JLabel timerLabel = new JLabel("Time: 00:00");
+        turnPanel.add(turnLabel);
+        turnPanel.add(timerLabel);
+        gameBoardPanel.add(turnPanel, BorderLayout.SOUTH);
+        
+        principal.add(gameBoardPanel, "gameBoard");
     }
+
+    private void checkReady(){
+        if (player1Ready && player2Ready){
+
+            String player1Name = name1.getText();
+            String player2Name = name2.getText();
+
+            showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
+    }
+} 
 
     private void prepareActions()
     {
@@ -356,11 +425,24 @@ public class QuoridorGUI extends JFrame {
                 setMode("TT");
             }
         });
+
+        ok1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                player1Ready = true;
+                checkReady();
+            }
+        });
+
+        ok2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                player2Ready = true;
+                checkReady();
+            }
+        });
     }
 
     private void newGameAction(){
 
-       
         CardLayout cl = (CardLayout) (principal.getLayout());
                 cl.show(principal, "choseSpace");
         
@@ -412,6 +494,12 @@ public class QuoridorGUI extends JFrame {
         CardLayout cl = (CardLayout) (principal.getLayout());
                 cl.show(principal, "setPlayers");
 
+    }
+
+    private void showGameBoardScreen(String player1Name, String player2Name, Color player1Color, Color player2Color) {
+    
+        CardLayout cl = (CardLayout) principal.getLayout();
+        cl.show(principal, "gameBoard");
     }
 
 
