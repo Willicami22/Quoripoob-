@@ -1,15 +1,17 @@
 package domain;
+import java.awt.Color;
 import java.util.*;
 
 public class playerTab {
 
-    private String color;
+    private Color color;
     private ArrayList<box> movements; 
     private String name;
     private Map<String, Integer> barriers;
     protected box position;
+    private int winningRow;
 
-    public playerTab(box boxPosition, String color, String name ){
+    public playerTab(box boxPosition, Color color, String name, int winningRow ){
         
         position=boxPosition;
         movements= new ArrayList<>();
@@ -35,5 +37,16 @@ public class playerTab {
 
     }
 
+    public boolean hasWon() {
 
+        return position.getRow() == winningRow;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public Color getColor(){
+        return color;
+    }
 }

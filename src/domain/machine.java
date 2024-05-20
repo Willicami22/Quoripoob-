@@ -1,16 +1,13 @@
 package domain;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
 public class machine extends playerTab {
 
-    public machine(String randomColor,String randomName,int rowInit, int columnInit, Map<String, Integer> barriers){
-
-        super(randomColor,randomName ,rowInit, columnInit,barriers);
-
-    
-
+    public machine(box boxPosition, Color color, String name, int winningRow ){
+        super(boxPosition, color, name, winningRow);
     }
 }

@@ -3,6 +3,8 @@ package domain;
 import java.awt.Color;
 import java.util.*;
 
+import javax.swing.JOptionPane;
+
 public class QuoridorGame  {
 
     private playerTab[] players;
@@ -42,21 +44,25 @@ public class QuoridorGame  {
         this.mode=mode;
     }
 
-    public void setPlayers(int player, String name, String color){
+    public void setPlayers(int player, String name, Color color){
 
         box BoxInit = (player == 1) ? board.getBox(0, 4) : board.getBox(8, 4);
 
-        playerTab playerGame = new playerTab(BoxInit, color, name);  
+        int winningRow = (player == 1) ? 8 : 0;
+
+        playerTab playerGame = new playerTab(BoxInit, color, name, winningRow);  
 
         players[player-1] = playerGame;
 
     }
 
+    
+
     public void moveTab(String direction) throws QuoripoobException{
 
         if (actualPlayer >= 0 && actualPlayer < players.length){
 
-            boolean diagonal= true;
+            
 
             playerTab currentPlayer = players[actualPlayer];
             box currentBox = currentPlayer.getCurrentBox();
@@ -69,17 +75,13 @@ public class QuoridorGame  {
    
                 newPosition=obtainNewPosition(direction, newPosition);
             }
-            else if (comprobePlayer){
 
-                diagonal=false;
-            }
-            if (isValidMove(newPosition[0], newPosition[1], direction) && diagonal) {
+            if (isValidMove(newPosition[0], newPosition[1], direction)) {
 
                 currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
-
                 comprobeWinner();
-
                 actualPlayer = (actualPlayer + 1) % players.length;
+
 
             }
         }
@@ -120,21 +122,90 @@ public class QuoridorGame  {
         return newPosition;
     }
 
-    public void putBarrier(){
+    public void putBarrier(int rowInit, int columnInit, String orientation) throws QuoripoobException {
+        if (!isValidBarrierPlacement(rowInit, columnInit, orientation)) {
+            throw new QuoripoobException("Invalid barrier placement");
+        }
+        
+        
+
+        if (orientation.equals("H")) {
+            barrier barrier= new barrier(true);
+            board.getBox(rowInit, columnInit).placeBarrier(barrier,"S");
+            board.getBox(rowInit, columnInit + 1).placeBarrier(barrier,"S");
+            board.getBox(rowInit+1, columnInit).placeBarrier(barrier,"N");
+            board.getBox(rowInit+1, columnInit + 1).placeBarrier(barrier,"N");
 
 
+        } else if (orientation.equals("V")) {
+            barrier barrier= new barrier(false);
+            board.getBox(rowInit, columnInit-1).placeBarrier(barrier,"E");
+            board.getBox(rowInit , columnInit).placeBarrier(barrier,"W");
+            board.getBox(rowInit+1, columnInit-1).placeBarrier(barrier,"E");
+            board.getBox(rowInit+1 , columnInit).placeBarrier(barrier,"W");
+        } else {
+            throw new QuoripoobException("Invalid orientation");
+        }
+    }
+
+    public boolean isValidBarrierPlacement(int rowInit,int columnInit,String orientation){
+
+        if (rowInit < 0 && rowInit > board.getSize() && columnInit < 0 && columnInit > board.getSize() ){
+            return false;
+        }
+
+        if ((orientation=="H" && (columnInit==8 || columnInit==9))|| (orientation=="V" && (rowInit==8 || rowInit==9)))
+
+        if((orientation=="H" && rowInit==0) || (orientation=="H" && rowInit==9) || (orientation=="V" && columnInit==0) || (orientation=="V" && columnInit==9)){
+            return false;
+        }
+
+        if (orientation.equals("H")) {
+            return !board.getBox(rowInit, columnInit).hasBarrier("S") &&
+                   !board.getBox(rowInit, columnInit + 1).hasBarrier("S") &&
+                   !board.getBox(rowInit+1, columnInit ).hasBarrier("N") &&
+                   !board.getBox(rowInit+1, columnInit + 1).hasBarrier("N");
+        } else {
+            return  !board.getBox(rowInit, columnInit-1).hasBarrier("E") &&
+                    !board.getBox(rowInit, columnInit ).hasBarrier("W") &&
+                    !board.getBox(rowInit+1, columnInit-1 ).hasBarrier("E") &&
+                    !board.getBox(rowInit+1, columnInit ).hasBarrier("W");
+        }
 
     }
 
     public void playMachine(){
         
+        if(difficult=="begginer"){
+            Random random = new Random();
+            int randomNumber = random.nextInt(2) + 1;
+
+            if(randomNumber==1){
+                moveTabBegginer();
+            }
+            else {
+                putBarrierBegginer();
+            }
+        }
+
+        else if(difficult=="intermediate"){
+
+        }
+
+        else{
+
+        }
 
 
     }
 
     public void moveTabBegginer(){
         
+        
 
+    }
+
+    public void putBarrierBegginer(){
 
     }
 
@@ -232,12 +303,27 @@ public class QuoridorGame  {
     }
     
 
-    public void comprobeWinner(){
+    public void comprobeWinner() {
+        for (playerTab player : players) {
+            if (player.hasWon()) {
+                JOptionPane.showMessageDialog(null, "Player " + player.getName() + " has won!");
+                endGame("Player Win");
+                return;  
+            }
+        }
+    }
 
+    public void giveUp(){
+
+        playerTab lostPlayer = players[actualPlayer]; 
+
+        JOptionPane.showMessageDialog(null, "Player " + lostPlayer.getName() + " you give up.");
+
+        endGame("Give up");
     }
 
     public boolean comprobePlayer(int Row, int Column){
-
+ 
         boolean comprobe=false;
 
         int indexOtherPlayer=(actualPlayer + 1) % players.length;
@@ -250,6 +336,21 @@ public class QuoridorGame  {
 
         return comprobe;
 
+    }
+
+    public void endGame(String cause){
+
+        JOptionPane.showMessageDialog(null, "Game over. Thanks for playing!");
+
+
+    }
+
+    public playerTab[] getPlayers(){
+        return players;
+    }
+
+    public board getBoard(){
+        return board;
     }
 
 

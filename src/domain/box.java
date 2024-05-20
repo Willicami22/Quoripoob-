@@ -40,6 +40,18 @@ public class box {
         return (!barrier.equals(null));
 
     }
+
+    public boolean hasBarrier(String direction){
+
+        return !barriers.get(direction).equals(null);
+
+    }
+
+    public void placeBarrier(barrier barrier, String direction){
+
+        barriers.put(direction, barrier);
+
+    }
  }
 
 

@@ -2,7 +2,12 @@ package domain;
 
 public class allied extends barrier {
 
-    private player owner;
+    private playerTab owner;
 
-    
+    public allied(boolean orientation, playerTab owner){
+
+        super(orientation);
+        this.owner=owner;
+    }
+
 }

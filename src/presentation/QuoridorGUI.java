@@ -46,7 +46,7 @@ public class QuoridorGUI extends JFrame {
     private Color player1Color;
     private Color player2Color;
 
-    private JPanel gameBoardPanel;
+    private JPanel gameBoardPanel, QuoridorBoard;
     private JButton forward,left,right,back,leftDiagonal,rightDiagonal,giveUp,putBarrier;
 
 
@@ -288,36 +288,8 @@ public class QuoridorGUI extends JFrame {
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
         
-        JPanel boardPanel = new JPanel(new GridLayout(11, 9));
-        JButton[][] boardButtons = new JButton[9][9];
-        
-        JLabel player1Label = new JLabel();
-        player1Label.setHorizontalAlignment(SwingConstants.CENTER);
-        boardPanel.add(player1Label);
-        
-        for (int col = 0; col < 9; col++) {
-            boardPanel.add(new JLabel());
-        }
-        
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(60, 60));
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                    }
-                });
-                boardButtons[row][col] = button;
-                boardPanel.add(button);
-            }
-        }
-        
-        JLabel player2Label = new JLabel();
-        player2Label.setHorizontalAlignment(SwingConstants.CENTER);
-        boardPanel.add(player2Label);
-        
-        gameBoardPanel.add(boardPanel, BorderLayout.CENTER);
+        QuoridorBoard quoridorBoard = new QuoridorBoard(Quoripoob);
+        gameBoardPanel.add(quoridorBoard, BorderLayout.CENTER);
         
         JPanel rightPanel = new JPanel(new GridLayout(2, 1));
         
@@ -348,8 +320,8 @@ public class QuoridorGUI extends JFrame {
         
         gameBoardPanel.add(rightPanel, BorderLayout.EAST);
         
-        JButton surrenderButton = new JButton("Surrender");
-        gameBoardPanel.add(surrenderButton, BorderLayout.NORTH);
+        giveUp = new JButton("Give Up");
+        gameBoardPanel.add(giveUp, BorderLayout.NORTH);
         
         JPanel turnPanel = new JPanel(new FlowLayout());
         JLabel turnLabel = new JLabel();
@@ -360,7 +332,7 @@ public class QuoridorGUI extends JFrame {
         
         principal.add(gameBoardPanel, "gameBoard");
     }
-
+    
 
     private void prepareActions()
     {
@@ -469,6 +441,12 @@ public class QuoridorGUI extends JFrame {
                 checkReady();
             }
         });
+
+        giveUp.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                giveUpAction();
+            }
+        });
     }
 
     private void newGameAction(){
@@ -533,17 +511,24 @@ public class QuoridorGUI extends JFrame {
             String player2Name = name2.getText();
             String colorName1 = getColorName(player1Color);
             String colorName2 = getColorName(player2Color);
-            Quoripoob.setPlayers(1, player1Name, colorName1);
-            Quoripoob.setPlayers(2, player2Name, colorName2);
+            Quoripoob.setPlayers(1, player1Name, player1Color);
+            Quoripoob.setPlayers(2, player2Name, player2Color);
 
             showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
         }
     } 
-
+    
     private void showGameBoardScreen(String player1Name, String player2Name, Color player1Color, Color player2Color) {
     
         CardLayout cl = (CardLayout) principal.getLayout();
         cl.show(principal, "gameBoard");
+    }
+
+    private void giveUpAction(){
+        Quoripoob.giveUp();
+            CardLayout cl = (CardLayout) principal.getLayout();
+            cl.show(principal, "initPanel");
+        Quoripoob= new QuoridorGame();
     }
 
 

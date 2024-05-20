@@ -7,9 +7,13 @@ public class barrier {
     protected box positionI; 
 
     public barrier(boolean orientation){
-        positionI=null;
+
+        color="black";
         this.orientation=orientation;
+        positionI=null;
     }
+
+    
 
     
 
