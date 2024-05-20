@@ -25,8 +25,14 @@ public class board {
 
     }
 
-    public box getBoxd(int row, int col) {
+    public box getBox(int row, int col) {
         return boxes[row][col];
+    }
+
+    public int getSize(){
+
+        return size;
+
     }
 
 

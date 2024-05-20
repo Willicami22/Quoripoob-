@@ -8,7 +8,7 @@ public class box {
     protected int row;
     protected int column;
     protected boolean isNormal;
-    protected Map<String, box> barriers;
+    protected Map<String, barrier> barriers;
 
     public box(int row, int column){
 
@@ -20,5 +20,26 @@ public class box {
         barriers.put("E",null);
         barriers.put("W",null);
     }    
-}
+
+    public int getRow(){
+
+        return row;
+
+    }
+
+    public int getColumn(){
+
+        return column;
+
+    }
+
+    public boolean thereIsABarrier(String direction){
+
+        barrier barrier= barriers.get(direction);
+
+        return (!barrier.equals(null));
+
+    }
+ }
+
 
