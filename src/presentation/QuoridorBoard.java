@@ -7,7 +7,6 @@ import domain.*;
 public class QuoridorBoard extends JPanel {
 
     private QuoridorGame game;
-    private Color[] playerColors = {Color.RED, Color.BLUE}; 
 
     public QuoridorBoard(QuoridorGame game) {
         this.game = game;
@@ -42,7 +41,7 @@ public class QuoridorBoard extends JPanel {
             int x = position.getColumn() * boxSize + boxSize / 4;
             int y = position.getRow() * boxSize + boxSize / 4;
             int size = boxSize / 2;
-            g.setColor(playerColors[0]); 
+            g.setColor(player.getColor()); 
             g.fillOval(x, y, size, size); 
         }
     }
