@@ -10,6 +10,9 @@ import domain.QuoridorGame;
 import java.util.*;
 import javax.swing.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class QuoridorGUI extends JFrame {
     public static final int Widht=800, Height=800;
@@ -198,9 +201,9 @@ public class QuoridorGUI extends JFrame {
     
         player1 = new JPanel(new GridLayout(4,0));
         player2 = new JPanel(new GridLayout(4,0));
-
-        name1= new JTextField();
-        name2= new JTextField();
+    
+        name1 = new JTextField();
+        name2 = new JTextField();
     
         Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.ORANGE, Color.CYAN, Color.MAGENTA};
         JPanel colorPanel1 = new JPanel();
@@ -220,7 +223,9 @@ public class QuoridorGUI extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     player1Color = color;
-                    selectedColorButton1.setBackground(color);
+                    selectedColorButton1.setBackground(player1Color);
+                    
+     
                 }
             });
             colorPanel1.add(colorButton1);
@@ -234,6 +239,7 @@ public class QuoridorGUI extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     player2Color = color;
                     selectedColorButton2.setBackground(color);
+                
                 }
             });
             colorPanel2.add(colorButton2);
@@ -243,15 +249,15 @@ public class QuoridorGUI extends JFrame {
         selectedColorButton1.setPreferredSize(new Dimension(200, 50));
         selectedColorButton2.setEnabled(false); 
         selectedColorButton2.setPreferredSize(new Dimension(200, 50));
-
-        ok1= new JButton("Ready");
-        ok2= new JButton("Ready");
-
+    
+        ok1 = new JButton("Ready");
+        ok2 = new JButton("Ready");
+    
         player1.add(name1);
         player1.add(colorPanel1, BorderLayout.CENTER);
         player1.add(selectedColorButton1, BorderLayout.SOUTH);
         player1.add(ok1);
-
+    
         player2.add(name2);
         player2.add(colorPanel2, BorderLayout.CENTER);
         player2.add(selectedColorButton2, BorderLayout.SOUTH);
@@ -262,8 +268,22 @@ public class QuoridorGUI extends JFrame {
     
         principal.add(setPlayers, "setPlayers");
     }
-
     
+    public String getColorName(Color color) {
+
+    Map<Color, String> colorNameMap = new HashMap<>();
+        colorNameMap.put(Color.RED, "Red");
+        colorNameMap.put(Color.GREEN, "Green");
+        colorNameMap.put(Color.BLUE, "Blue");
+        colorNameMap.put(Color.YELLOW, "Yellow");
+        colorNameMap.put(Color.ORANGE, "Orange");
+        colorNameMap.put(Color.CYAN, "Cyan");
+        colorNameMap.put(Color.MAGENTA, "Magenta");
+    
+        String colorName = colorNameMap.get(color);
+        return (colorName != null) ? colorName : "Unknown Color";
+    }
+
 
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
@@ -341,15 +361,6 @@ public class QuoridorGUI extends JFrame {
         principal.add(gameBoardPanel, "gameBoard");
     }
 
-    private void checkReady(){
-        if (player1Ready && player2Ready){
-
-            String player1Name = name1.getText();
-            String player2Name = name2.getText();
-
-            showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
-    }
-} 
 
     private void prepareActions()
     {
@@ -515,6 +526,20 @@ public class QuoridorGUI extends JFrame {
 
     }
 
+    private void checkReady(){
+        if (player1Ready && player2Ready){
+
+            String player1Name = name1.getText();
+            String player2Name = name2.getText();
+            String colorName1 = getColorName(player1Color);
+            String colorName2 = getColorName(player2Color);
+            Quoripoob.setPlayers(1, player1Name, colorName1);
+            Quoripoob.setPlayers(2, player2Name, colorName2);
+
+            showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
+        }
+    } 
+
     private void showGameBoardScreen(String player1Name, String player2Name, Color player1Color, Color player2Color) {
     
         CardLayout cl = (CardLayout) principal.getLayout();
@@ -527,3 +552,4 @@ public class QuoridorGUI extends JFrame {
         home.setVisible(true);
     }    
 }
+

@@ -1,4 +1,5 @@
 package domain;
+import java.awt.Color;
 import java.util.*;
 
 public class playerTab {
@@ -7,16 +8,21 @@ public class playerTab {
     private ArrayList<int[][]> movements; 
     private String name;
     private Map<String, Integer> barriers;
-    protected int row;
-    protected int column;
+    protected box position;
 
-    public playerTab(String color,String name, int rowInit, int columnInit, Map<String, Integer> barriers){
+    public playerTab(box boxPosition, String color, String name ){
         
+        position=boxPosition;
         this.color=color;
         this.name=name;
-        this.row=row;
-        this.column=column;
+
+    }
+
+    public void setBarriers(Map<String, Integer> barriers){
+
         this.barriers=barriers;
 
     }
+
+
 }
