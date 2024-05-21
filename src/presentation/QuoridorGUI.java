@@ -38,16 +38,18 @@ public class QuoridorGUI extends JFrame {
     private JButton normalMode, timeTrial, timed; 
 
     private JSplitPane setPlayers;
-    private JPanel player1, player2;
+    private JPanel player1, player2, namePanel1, namePanel2,colorPanel1,colorPanel2;
     private JTextField name1, name2;
-    private JButton ok1,ok2 ;
+    private JLabel nameLabel1,nameLabel2;
+    private JButton ok1,ok2, selectedColorButton1, selectedColorButton2 ;
     private boolean player1Ready = false;
     private boolean player2Ready = false;
     private Color player1Color;
     private Color player2Color;
 
     private JPanel gameBoardPanel, QuoridorBoard;
-    private JButton forward,left,right,back,leftDiagonal,rightDiagonal,giveUp,putBarrier;
+    private JLabel barrierTypeLabel;
+    private JButton forward,left,right,back,leftForward,rightForward,leftBack,rightBack,giveUp,putBarrier;
 
 
 
@@ -56,13 +58,12 @@ public class QuoridorGUI extends JFrame {
 
     public QuoridorGUI(){
 
+        Quoripoob= new QuoridorGame();
         prepareElements();
         prepareActions();
     }
 
     private void prepareElements(){
-
-        Quoripoob=new QuoridorGame();
 
         principal=new JPanel(new CardLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -203,16 +204,27 @@ public class QuoridorGUI extends JFrame {
         player2 = new JPanel(new GridLayout(4,0));
     
         name1 = new JTextField();
+        name1.setPreferredSize(new Dimension(100, 30)); 
+        nameLabel1 = new JLabel("Name:");
+        namePanel1 = new JPanel(new BorderLayout());
+        namePanel1.add(nameLabel1, BorderLayout.WEST);
+        namePanel1.add(name1, BorderLayout.CENTER);
+    
         name2 = new JTextField();
+        name2.setPreferredSize(new Dimension(100, 30)); 
+        nameLabel2 = new JLabel("Name:");
+        namePanel2 = new JPanel(new BorderLayout());
+        namePanel2.add(nameLabel2, BorderLayout.WEST);
+        namePanel2.add(name2, BorderLayout.CENTER);
     
         Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.ORANGE, Color.CYAN, Color.MAGENTA};
-        JPanel colorPanel1 = new JPanel();
-        JPanel colorPanel2 = new JPanel();
+        colorPanel1 = new JPanel();
+        colorPanel2 = new JPanel();
         colorPanel1.setLayout(new GridLayout(1, colors.length, 5, 5)); 
         colorPanel2.setLayout(new GridLayout(1, colors.length, 5, 5)); 
     
-        JButton selectedColorButton1 = new JButton("Selected Color Player 1");
-        JButton selectedColorButton2 = new JButton("Selected Color Player 2");
+        selectedColorButton1 = new JButton("Selected Color Player 1");
+        selectedColorButton2 = new JButton("Selected Color Player 2");
     
         for (Color color : colors) {
             JButton colorButton1 = new JButton();
@@ -224,8 +236,6 @@ public class QuoridorGUI extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     player1Color = color;
                     selectedColorButton1.setBackground(player1Color);
-                    
-     
                 }
             });
             colorPanel1.add(colorButton1);
@@ -239,7 +249,6 @@ public class QuoridorGUI extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     player2Color = color;
                     selectedColorButton2.setBackground(color);
-                
                 }
             });
             colorPanel2.add(colorButton2);
@@ -253,14 +262,14 @@ public class QuoridorGUI extends JFrame {
         ok1 = new JButton("Ready");
         ok2 = new JButton("Ready");
     
-        player1.add(name1);
-        player1.add(colorPanel1, BorderLayout.CENTER);
-        player1.add(selectedColorButton1, BorderLayout.SOUTH);
+        player1.add(namePanel1); 
+        player1.add(colorPanel1);
+        player1.add(selectedColorButton1);
         player1.add(ok1);
     
-        player2.add(name2);
-        player2.add(colorPanel2, BorderLayout.CENTER);
-        player2.add(selectedColorButton2, BorderLayout.SOUTH);
+        player2.add(namePanel2); 
+        player2.add(colorPanel2);
+        player2.add(selectedColorButton2);
         player2.add(ok2);
     
         setPlayers.setLeftComponent(player1);
@@ -269,77 +278,72 @@ public class QuoridorGUI extends JFrame {
         principal.add(setPlayers, "setPlayers");
     }
     
-    public String getColorName(Color color) {
-
-    Map<Color, String> colorNameMap = new HashMap<>();
-        colorNameMap.put(Color.RED, "Red");
-        colorNameMap.put(Color.GREEN, "Green");
-        colorNameMap.put(Color.BLUE, "Blue");
-        colorNameMap.put(Color.YELLOW, "Yellow");
-        colorNameMap.put(Color.ORANGE, "Orange");
-        colorNameMap.put(Color.CYAN, "Cyan");
-        colorNameMap.put(Color.MAGENTA, "Magenta");
-    
-        String colorName = colorNameMap.get(color);
-        return (colorName != null) ? colorName : "Unknown Color";
-    }
-
-
-    private void prepareElementsGameBoard() {
-        gameBoardPanel = new JPanel(new BorderLayout());
+        private void prepareElementsGameBoard() {
+            gameBoardPanel = new JPanel(new BorderLayout());
+            
+            QuoridorBoard quoridorBoard = new QuoridorBoard(Quoripoob);
+            quoridorBoard.setPreferredSize(new Dimension(600, 600));
+            gameBoardPanel.add(quoridorBoard, BorderLayout.CENTER);
+            
+            JPanel rightPanel = new JPanel(new GridLayout(3, 1)); // Cambiado de 2 a 3
+            rightPanel.setPreferredSize(new Dimension(300, 600)); // Ajusta el ancho según tus necesidades
+            
+            JPanel playerInfoPanel = new JPanel(new BorderLayout());
+            JLabel currentPlayerLabel = new JLabel("Current Player: ");
+            JLabel playerNameLabel = new JLabel(getName());
+            JLabel playerColorLabel = new JLabel("hola");
+            playerInfoPanel.add(currentPlayerLabel, BorderLayout.NORTH);
+            playerInfoPanel.add(playerNameLabel, BorderLayout.CENTER);
+            playerInfoPanel.add(playerColorLabel, BorderLayout.SOUTH);
+            rightPanel.add(playerInfoPanel);
+            
+            JPanel barrierSelectionPanel = new JPanel(new GridLayout(4, 1));
+            JLabel columnLabel = new JLabel("Column:");
+            JTextField columnTextField = new JTextField();
+            JLabel rowLabel = new JLabel("Row:");
+            JTextField rowTextField = new JTextField();
+            JLabel barrierTypeLabel = new JLabel("Barrier Type:");
+            JComboBox<String> barrierTypeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
+            JButton placeBarrierButton = new JButton("Place Barrier");
+            barrierSelectionPanel.add(columnLabel);
+            barrierSelectionPanel.add(columnTextField);
+            barrierSelectionPanel.add(rowLabel);
+            barrierSelectionPanel.add(rowTextField);
+            barrierSelectionPanel.add(barrierTypeLabel);
+            barrierSelectionPanel.add(barrierTypeComboBox);
+            barrierSelectionPanel.add(placeBarrierButton);
+            rightPanel.add(barrierSelectionPanel);
+            
+            JPanel barrierInformationPanel = new JPanel(new BorderLayout());
+            JLabel remainingBarriersLabel = new JLabel("Remaining Barriers:");
+            JTable barrierTable = new JTable(new String[][]{{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[]{"Barrier Type", "Count"});
+            JScrollPane scrollPane = new JScrollPane(barrierTable);
+            barrierInformationPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
+            barrierInformationPanel.add(scrollPane, BorderLayout.CENTER);
+            rightPanel.add(barrierInformationPanel);
+            
+            gameBoardPanel.add(rightPanel, BorderLayout.EAST);
+            
+            giveUp = new JButton("Give Up");
+            gameBoardPanel.add(giveUp, BorderLayout.NORTH);
+            
+            JPanel turnPanel = new JPanel(new FlowLayout());
+            JLabel turnLabel = new JLabel();
+            JLabel timerLabel = new JLabel("Time: 00:00");
+            turnPanel.add(turnLabel);
+            turnPanel.add(timerLabel);
+            gameBoardPanel.add(turnPanel, BorderLayout.SOUTH);
+            
+            principal.add(gameBoardPanel, "gameBoard");
+        }
         
-        QuoridorBoard quoridorBoard = new QuoridorBoard(Quoripoob);
-        gameBoardPanel.add(quoridorBoard, BorderLayout.CENTER);
-        
-        JPanel rightPanel = new JPanel(new GridLayout(2, 1));
-        
-        JPanel barrierSelectionPanel = new JPanel(new GridLayout(4, 1));
-        JLabel columnLabel = new JLabel("Column:");
-        JTextField columnTextField = new JTextField();
-        JLabel rowLabel = new JLabel("Row:");
-        JTextField rowTextField = new JTextField();
-        JLabel barrierTypeLabel = new JLabel("Barrier Type:");
-        JComboBox<String> barrierTypeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
-        JButton placeBarrierButton = new JButton("Place Barrier");
-        barrierSelectionPanel.add(columnLabel);
-        barrierSelectionPanel.add(columnTextField);
-        barrierSelectionPanel.add(rowLabel);
-        barrierSelectionPanel.add(rowTextField);
-        barrierSelectionPanel.add(barrierTypeLabel);
-        barrierSelectionPanel.add(barrierTypeComboBox);
-        barrierSelectionPanel.add(placeBarrierButton);
-        rightPanel.add(barrierSelectionPanel);
-        
-        JPanel barrierInformationPanel = new JPanel(new BorderLayout());
-        JLabel remainingBarriersLabel = new JLabel("Remaining Barriers:");
-        JTable barrierTable = new JTable(new String[][]{{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[]{"Barrier Type", "Count"});
-        JScrollPane scrollPane = new JScrollPane(barrierTable);
-        barrierInformationPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
-        barrierInformationPanel.add(scrollPane, BorderLayout.CENTER);
-        rightPanel.add(barrierInformationPanel);
-        
-        gameBoardPanel.add(rightPanel, BorderLayout.EAST);
-        
-        giveUp = new JButton("Give Up");
-        gameBoardPanel.add(giveUp, BorderLayout.NORTH);
-        
-        JPanel turnPanel = new JPanel(new FlowLayout());
-        JLabel turnLabel = new JLabel();
-        JLabel timerLabel = new JLabel("Time: 00:00");
-        turnPanel.add(turnLabel);
-        turnPanel.add(timerLabel);
-        gameBoardPanel.add(turnPanel, BorderLayout.SOUTH);
-        
-        principal.add(gameBoardPanel, "gameBoard");
-    }
-    
-
     private void prepareActions()
     {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent ev){
                 setVisible(false);
                 System.exit(0);
+                
             }
         });
 
@@ -504,20 +508,23 @@ public class QuoridorGUI extends JFrame {
 
     }
 
-    private void checkReady(){
-        if (player1Ready && player2Ready){
-
-            String player1Name = name1.getText();
-            String player2Name = name2.getText();
-            String colorName1 = getColorName(player1Color);
-            String colorName2 = getColorName(player2Color);
-            Quoripoob.setPlayers(1, player1Name, player1Color);
-            Quoripoob.setPlayers(2, player2Name, player2Color);
-
-            showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
-        }
-    } 
+    private void checkReady() {
+        if (player1Ready && player2Ready) {
+            String player1Name = name1.getText().trim();
+            String player2Name = name2.getText().trim();
+            
+            if (!player1Name.isEmpty() && !player2Name.isEmpty() && player1Color != null && player2Color != null) {
+                Quoripoob.setPlayers(0, player1Name, player1Color);
+                Quoripoob.setPlayers(1, player2Name, player2Color);
     
+                showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
+            } else {
+                JOptionPane.showMessageDialog(this, "Por favor ingresa nombres y selecciona colores para ambos jugadores.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+
     private void showGameBoardScreen(String player1Name, String player2Name, Color player1Color, Color player2Color) {
     
         CardLayout cl = (CardLayout) principal.getLayout();
@@ -531,6 +538,8 @@ public class QuoridorGUI extends JFrame {
         Quoripoob= new QuoridorGame();
     }
 
+
+    
 
     public static void main(String args[]){
         QuoridorGUI home=new QuoridorGUI();

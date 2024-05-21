@@ -76,10 +76,10 @@ public class QuoridorGame  {
      * @param color The color of the player's pieces.
      */
     public void setPlayers(int player, String name, Color color){
-        box BoxInit = (player == 1) ? board.getBox(0, 4) : board.getBox(8, 4);
-        int winningRow = (player == 1) ? 8 : 0;
+        box BoxInit = (player == 0) ? board.getBox(0, 4) : board.getBox(8, 4);
+        int winningRow = (player == 0) ? 8 : 0;
         playerTab playerGame = new playerTab(BoxInit, color, name, winningRow);  
-        players[player-1] = playerGame;
+        players[player] = playerGame;
     }
 
     /**
@@ -423,6 +423,10 @@ public class QuoridorGame  {
      */
     public board getBoard(){
         return board;
+    }
+
+    public playerTab getActualPlayer(){ 
+        return players[actualPlayer];
     }
 }
 
