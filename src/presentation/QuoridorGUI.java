@@ -323,8 +323,8 @@ public class QuoridorGUI extends JFrame {
         gameBoardPanel = new JPanel(new BorderLayout());
     
         // Panel izquierdo - Información de los jugadores
-        JPanel leftPanel = new JPanel(new GridLayout(3, 1));
-        leftPanel.setPreferredSize(new Dimension(300, 600));
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setPreferredSize(new Dimension(400, 800)); // Aumenta el ancho y la altura del panel izquierdo
     
         JPanel player2Panel = new JPanel(new BorderLayout());
         JLabel player2Label = new JLabel("J2:");
@@ -333,11 +333,11 @@ public class QuoridorGUI extends JFrame {
         player2Panel.add(player2Label, BorderLayout.NORTH);
         player2Panel.add(player2NameLabel, BorderLayout.CENTER);
         player2Panel.add(player2ColorLabel, BorderLayout.SOUTH);
-        leftPanel.add(player2Panel);
+        leftPanel.add(player2Panel, BorderLayout.NORTH);
     
         QuoridorBoard = new QuoridorBoard(Quoripoob);
-        QuoridorBoard.setPreferredSize(new Dimension(800, 800));
-        gameBoardPanel.add(QuoridorBoard, BorderLayout.CENTER);
+        QuoridorBoard.setPreferredSize(new Dimension(800, 800)); // Ajusta las dimensiones del tablero
+        leftPanel.add(QuoridorBoard,BorderLayout.CENTER); // Agrega el tablero al panel izquierdo
     
         JPanel player1Panel = new JPanel(new BorderLayout());
         JLabel player1Label = new JLabel("J1:");
@@ -346,7 +346,7 @@ public class QuoridorGUI extends JFrame {
         player1Panel.add(player1Label, BorderLayout.NORTH);
         player1Panel.add(player1NameLabel, BorderLayout.CENTER);
         player1Panel.add(player1ColorLabel, BorderLayout.SOUTH);
-        leftPanel.add(player1Panel);
+        leftPanel.add(player1Panel,BorderLayout.SOUTH);
     
         gameBoardPanel.add(leftPanel, BorderLayout.WEST);
     
@@ -357,13 +357,21 @@ public class QuoridorGUI extends JFrame {
         JPanel controlPanel = new JPanel(new GridLayout(2, 1));
     
         // Panel de selección de acción (Colocar o Mover)
-        JPanel actionPanel = new JPanel(new FlowLayout());
+        JPanel actionPanel = new JPanel();
+        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.X_AXIS));
+        actionPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar en el eje X
+
         JButton placeButton = new JButton("Colocar");
         JButton moveButton = new JButton("Mover");
+
+        actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
         actionPanel.add(placeButton);
+        actionPanel.add(Box.createHorizontalStrut(10)); // Espacio horizontal entre botones
         actionPanel.add(moveButton);
+        actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
+
         controlPanel.add(actionPanel);
-    
+        
         JPanel actionOptionsPanel = new JPanel(new CardLayout());
     
         // Opciones para colocar barrera
