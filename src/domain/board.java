@@ -1,13 +1,15 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The board class represents the game board in the Quoridor game.
  */
-public class board {
+public class board implements Serializable{
 
+    private static final long serialVersionUID = 1L; 
     private int size;
     private box[][] boxes;
 

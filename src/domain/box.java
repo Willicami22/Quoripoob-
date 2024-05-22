@@ -1,13 +1,15 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The box class represents a single cell or square on the game board in the Quoridor game.
  */
-public class box {
-
+public class box implements Serializable {
+    
+    private static final long serialVersionUID = 1L; 
     protected int row;
     protected int column;
     protected boolean isNormal;

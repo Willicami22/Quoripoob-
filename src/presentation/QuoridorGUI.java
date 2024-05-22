@@ -2,10 +2,14 @@ package presentation;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
+import domain.Log;
 import domain.QuoridorGame;
+import domain.QuoripoobException;
 
 import java.util.*;
 import javax.swing.*;
@@ -51,7 +55,7 @@ public class QuoridorGUI extends JFrame {
 
     private JPanel gameBoardPanel, QuoridorBoard;
     private JLabel barrierTypeLabel;
-    private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier;
+    private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier,save;
 
 
 
@@ -376,19 +380,19 @@ public class QuoridorGUI extends JFrame {
     
         // Opciones para colocar barrera
         JPanel placePanel = new JPanel(new GridLayout(5, 2));
-        placePanel.add(new JLabel("Dirección:"));
+        placePanel.add(new JLabel("Orientation:"));
         JComboBox<String> directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
         placePanel.add(directionComboBox);
-        placePanel.add(new JLabel("Fila:"));
+        placePanel.add(new JLabel("Row:"));
         JTextField rowTextField = new JTextField();
         placePanel.add(rowTextField);
-        placePanel.add(new JLabel("Columna:"));
+        placePanel.add(new JLabel("Column:"));
         JTextField columnTextField = new JTextField();
         placePanel.add(columnTextField);
-        placePanel.add(new JLabel("Tipo:"));
+        placePanel.add(new JLabel("Type:"));
         JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
         placePanel.add(typeComboBox);
-        JButton placeBarrierButton = new JButton("Colocar Barrera");
+        JButton placeBarrierButton = new JButton("Put Barrier");
         placePanel.add(placeBarrierButton);
     
         JPanel movePanel = new JPanel(new GridLayout(3, 3));
@@ -444,9 +448,13 @@ public class QuoridorGUI extends JFrame {
         bottomPanel.add(turnLabel);
         bottomPanel.add(currentPlayerLabel);
         bottomPanel.add(timerLabel);
+        // Botón de rendirse
+        save = new JButton("Save");
+        gameBoardPanel.add(save, BorderLayout.NORTH);
         gameBoardPanel.add(bottomPanel, BorderLayout.SOUTH);
     
         principal.add(gameBoardPanel, "gameBoard");
+
     
         // Acción de botones
         placeButton.addActionListener(new ActionListener() {
@@ -573,6 +581,12 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
+        save.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                optionSave();;
+            }
+        });
+
     }
 
     private void newGameAction(){
@@ -582,23 +596,50 @@ public class QuoridorGUI extends JFrame {
         
     }
 
-    private void continueGameAction(){
-
-      
-        CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "chose");
+    private void continueGameAction() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(QuoridorGUI.this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                // Cargar el estado del juego desde el archivo
+                Quoripoob = QuoridorGame.open(selectedFile);
+    
+                // Actualizar la interfaz de juego para reflejar el estado del juego cargado
+                updateGameBoardUI();
+    
+                // Cambiar al panel de juego (gameBoard)
+                CardLayout cl = (CardLayout) (principal.getLayout());
+                cl.show(principal, "gameBoard");
+    
+            } catch (QuoripoobException ex) {
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al abrir el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
-    private void fileAction(){
-        if (Quoripoob.isNew()){
-            CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseOpponent");
-        }
-        else{
-            CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "game");
+private void optionSave() {
+    JFileChooser fileChooser = new JFileChooser();
+    int result = fileChooser.showSaveDialog(QuoridorGUI.this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            Quoripoob.save(selectedFile);
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Partida guardada correctamente!");
+        } catch (QuoripoobException ex) {
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            Log.record(ex); // Registra la excepción en el registro de errores
+        } catch (SecurityException ex) {
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Se ha denegado el acceso al archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            Log.record(ex); // Registra la excepción en el registro de errores
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error desconocido al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            Log.record(ex); // Registra la excepción en el registro de errores
         }
     }
+}
+
+ 
 
     private void setPlayer(String Opponent){
 
@@ -735,7 +776,15 @@ public class QuoridorGUI extends JFrame {
         return button;
     }
     
-
+    private void updateGameBoardUI() {
+        // Actualizar la interfaz de juego según el estado del juego cargado
+        // Por ejemplo, puedes actualizar la posición de los jugadores, las barreras, etc.
+    
+        // Llamar a revalidate() y repaint() para asegurarse de que los cambios se apliquen
+        gameBoardPanel.revalidate();
+        gameBoardPanel.repaint();
+    }
+    
     public static void main(String args[]){
         QuoridorGUI home=new QuoridorGUI();
         home.setVisible(true);
