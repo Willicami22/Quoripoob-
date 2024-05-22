@@ -10,9 +10,6 @@ import domain.QuoridorGame;
 import java.util.*;
 import javax.swing.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class QuoridorGUI extends JFrame {
     public static final int Widht=800, Height=800;
@@ -25,8 +22,6 @@ public class QuoridorGUI extends JFrame {
     private JPanel initPanel; 
     private JButton newGame,continueGame,exit;
 
-    private JPanel choseSpace;
-    private JButton game1,game2,game3;
 
     private JPanel choseOpponent;
     private JButton machine,human;
@@ -44,15 +39,19 @@ public class QuoridorGUI extends JFrame {
     private JButton ok1,ok2, selectedColorButton1, selectedColorButton2 ;
     private boolean player1Ready = false;
     private boolean player2Ready = false;
-    private Color player1Color;
-    private Color player2Color;
+    private Color player1Color,player2Color;
+    
+
+    private JPanel choseSpecials;
+    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField;
+    private ArrayList<JCheckBox> specialTileCheckBoxes;
+    private ArrayList<JTextField> specialTileQuantityFields;
+    private JButton submitButton;
+ 
 
     private JPanel gameBoardPanel, QuoridorBoard;
     private JLabel barrierTypeLabel;
     private JButton forward,left,right,back,leftForward,rightForward,leftBack,rightBack,giveUp,putBarrier;
-
-
-
 
 
 
@@ -72,7 +71,7 @@ public class QuoridorGUI extends JFrame {
         add(principal);
 
         prepareElementsInit();
-        prepareElementsSpace();
+        prepareElementsSpecials();
         prepareElementsOpponent();
         prepareElementsDifficult();
         prepareElementsMode();
@@ -106,27 +105,69 @@ public class QuoridorGUI extends JFrame {
         initPanel.setSize(PREFERRED_DIMENSION);
     }
     
-    private void prepareElementsSpace(){
-
-        choseSpace=new JPanel(new GridBagLayout());
-
+    private void prepareElementsSpecials() {
+        choseSpecials = new JPanel(new GridBagLayout());
+        choseSpecials.setBorder(BorderFactory.createTitledBorder("Special Tiles Configuration"));
+    
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;gbc.gridy = 0;gbc.weightx = 1.0;gbc.weighty = 1.0;gbc.fill = GridBagConstraints.BOTH;
-
-        game1=new JButton("Game 1");
-        game2= new JButton("Game 2");
-        game3= new JButton("Game 3");
-
-        gbc.insets = new Insets(10, 10, 10, 10); 
-
-        choseSpace.add(game1,gbc);
-        gbc.gridy++;
-        choseSpace.add(game2,gbc);
-        gbc.gridy++;
-        choseSpace.add(game3,gbc);
-        principal.add(choseSpace, "choseSpace");
-        choseSpace.setSize(PREFERRED_DIMENSION);
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+    
+        int row = 0;
+    
+        addLabeledField(choseSpecials, gbc, row++, "Normal Barriers:", normalBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Long Barriers:", longBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Allied Barriers:", alliedBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Total Special Tiles:", totalSpecialTilesField = new JTextField());
+    
+        specialTileCheckBoxes = new ArrayList<>();
+        specialTileQuantityFields = new ArrayList<>();
+    
+        String[] tileTypes = {"Teleporter", "Go Back", "Double Shift"};
+        for (String tileType : tileTypes) {
+            JCheckBox checkBox = new JCheckBox(tileType);
+            JTextField quantityField = new JTextField();
+            quantityField.setEnabled(false);
+    
+            checkBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    quantityField.setEnabled(checkBox.isSelected());
+                }
+            });
+    
+            specialTileCheckBoxes.add(checkBox);
+            specialTileQuantityFields.add(quantityField);
+    
+            gbc.gridy = row;
+            gbc.gridx = 0;
+            choseSpecials.add(checkBox, gbc);
+    
+            gbc.gridx = 1;
+            choseSpecials.add(quantityField, gbc);
+    
+            row++;
+        }
+    
+        gbc.gridy = row;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        submitButton = new JButton("Submit");
+        choseSpecials.add(submitButton, gbc);
+    
+        principal.add(choseSpecials, "choseSpecials");
     }
+    
+    private void addLabeledField(JPanel panel, GridBagConstraints gbc, int row, String labelText, JTextField textField) {
+        gbc.gridy = row;
+        gbc.gridx = 0;
+        panel.add(new JLabel(labelText), gbc);
+        gbc.gridx = 1;
+        panel.add(textField, gbc);
+    }
+    
 
     private void prepareElementsOpponent(){
 
@@ -278,64 +319,146 @@ public class QuoridorGUI extends JFrame {
         principal.add(setPlayers, "setPlayers");
     }
     
-        private void prepareElementsGameBoard() {
-            gameBoardPanel = new JPanel(new BorderLayout());
-            
-            QuoridorBoard quoridorBoard = new QuoridorBoard(Quoripoob);
-            quoridorBoard.setPreferredSize(new Dimension(600, 600));
-            gameBoardPanel.add(quoridorBoard, BorderLayout.CENTER);
-            
-            JPanel rightPanel = new JPanel(new GridLayout(3, 1)); // Cambiado de 2 a 3
-            rightPanel.setPreferredSize(new Dimension(300, 600)); // Ajusta el ancho según tus necesidades
-            
-            JPanel playerInfoPanel = new JPanel(new BorderLayout());
-            JLabel currentPlayerLabel = new JLabel("Current Player: ");
-            JLabel playerNameLabel = new JLabel(getName());
-            JLabel playerColorLabel = new JLabel("hola");
-            playerInfoPanel.add(currentPlayerLabel, BorderLayout.NORTH);
-            playerInfoPanel.add(playerNameLabel, BorderLayout.CENTER);
-            playerInfoPanel.add(playerColorLabel, BorderLayout.SOUTH);
-            rightPanel.add(playerInfoPanel);
-            
-            JPanel barrierSelectionPanel = new JPanel(new GridLayout(4, 1));
-            JLabel columnLabel = new JLabel("Column:");
-            JTextField columnTextField = new JTextField();
-            JLabel rowLabel = new JLabel("Row:");
-            JTextField rowTextField = new JTextField();
-            JLabel barrierTypeLabel = new JLabel("Barrier Type:");
-            JComboBox<String> barrierTypeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
-            JButton placeBarrierButton = new JButton("Place Barrier");
-            barrierSelectionPanel.add(columnLabel);
-            barrierSelectionPanel.add(columnTextField);
-            barrierSelectionPanel.add(rowLabel);
-            barrierSelectionPanel.add(rowTextField);
-            barrierSelectionPanel.add(barrierTypeLabel);
-            barrierSelectionPanel.add(barrierTypeComboBox);
-            barrierSelectionPanel.add(placeBarrierButton);
-            rightPanel.add(barrierSelectionPanel);
-            
-            JPanel barrierInformationPanel = new JPanel(new BorderLayout());
-            JLabel remainingBarriersLabel = new JLabel("Remaining Barriers:");
-            JTable barrierTable = new JTable(new String[][]{{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[]{"Barrier Type", "Count"});
-            JScrollPane scrollPane = new JScrollPane(barrierTable);
-            barrierInformationPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
-            barrierInformationPanel.add(scrollPane, BorderLayout.CENTER);
-            rightPanel.add(barrierInformationPanel);
-            
-            gameBoardPanel.add(rightPanel, BorderLayout.EAST);
-            
-            giveUp = new JButton("Give Up");
-            gameBoardPanel.add(giveUp, BorderLayout.NORTH);
-            
-            JPanel turnPanel = new JPanel(new FlowLayout());
-            JLabel turnLabel = new JLabel();
-            JLabel timerLabel = new JLabel("Time: 00:00");
-            turnPanel.add(turnLabel);
-            turnPanel.add(timerLabel);
-            gameBoardPanel.add(turnPanel, BorderLayout.SOUTH);
-            
-            principal.add(gameBoardPanel, "gameBoard");
-        }
+    private void prepareElementsGameBoard() {
+        gameBoardPanel = new JPanel(new BorderLayout());
+    
+        // Panel izquierdo - Información de los jugadores
+        JPanel leftPanel = new JPanel(new GridLayout(3, 1));
+        leftPanel.setPreferredSize(new Dimension(300, 600));
+    
+        JPanel player2Panel = new JPanel(new BorderLayout());
+        JLabel player2Label = new JLabel("J2:");
+        JLabel player2NameLabel = new JLabel(name1.getText());
+        JLabel player2ColorLabel = new JLabel();
+        player2Panel.add(player2Label, BorderLayout.NORTH);
+        player2Panel.add(player2NameLabel, BorderLayout.CENTER);
+        player2Panel.add(player2ColorLabel, BorderLayout.SOUTH);
+        leftPanel.add(player2Panel);
+    
+        QuoridorBoard = new QuoridorBoard(Quoripoob);
+        QuoridorBoard.setPreferredSize(new Dimension(600, 600));
+        gameBoardPanel.add(QuoridorBoard, BorderLayout.CENTER);
+    
+        JPanel player1Panel = new JPanel(new BorderLayout());
+        JLabel player1Label = new JLabel("J1:");
+        JLabel player1NameLabel = new JLabel(name1.getText());
+        JLabel player1ColorLabel = new JLabel();
+        player1Panel.add(player1Label, BorderLayout.NORTH);
+        player1Panel.add(player1NameLabel, BorderLayout.CENTER);
+        player1Panel.add(player1ColorLabel, BorderLayout.SOUTH);
+        leftPanel.add(player1Panel);
+    
+        gameBoardPanel.add(leftPanel, BorderLayout.WEST);
+    
+        // Panel derecho - Controles del juego
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setPreferredSize(new Dimension(300, 600));
+    
+        JPanel controlPanel = new JPanel(new GridLayout(2, 1));
+    
+        // Panel de selección de acción (Colocar o Mover)
+        JPanel actionPanel = new JPanel(new FlowLayout());
+        JButton placeButton = new JButton("Colocar");
+        JButton moveButton = new JButton("Mover");
+        actionPanel.add(placeButton);
+        actionPanel.add(moveButton);
+        controlPanel.add(actionPanel);
+    
+        JPanel actionOptionsPanel = new JPanel(new CardLayout());
+    
+        // Opciones para colocar barrera
+        JPanel placePanel = new JPanel(new GridLayout(5, 2));
+        placePanel.add(new JLabel("Dirección:"));
+        JComboBox<String> directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
+        placePanel.add(directionComboBox);
+        placePanel.add(new JLabel("Fila:"));
+        JTextField rowTextField = new JTextField();
+        placePanel.add(rowTextField);
+        placePanel.add(new JLabel("Columna:"));
+        JTextField columnTextField = new JTextField();
+        placePanel.add(columnTextField);
+        placePanel.add(new JLabel("Tipo:"));
+        JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
+        placePanel.add(typeComboBox);
+        JButton placeBarrierButton = new JButton("Colocar Barrera");
+        placePanel.add(placeBarrierButton);
+    
+        JPanel movePanel = new JPanel(new GridLayout(3, 3));
+
+        // Flechas para las direcciones
+        String upArrow = "\u2191"; // ↑
+        String downArrow = "\u2193"; // ↓
+        String leftArrow = "\u2190"; // ←
+        String rightArrow = "\u2192"; // →
+        String upLeftArrow = "\u2196"; // ↖
+        String upRightArrow = "\u2197"; // ↗
+        String downLeftArrow = "\u2199"; // ↙
+        String downRightArrow = "\u2198"; // ↘
+
+        // Botones con flechas para las direcciones
+        movePanel.add(createButtonWithArrow(upLeftArrow)); // Flecha arriba izquierda
+        movePanel.add(createButtonWithArrow(upArrow)); // Flecha arriba
+        movePanel.add(createButtonWithArrow(upRightArrow)); // Flecha arriba derecha
+        movePanel.add(createButtonWithArrow(leftArrow)); // Flecha izquierda
+        movePanel.add(new JLabel()); // Espacio vacío
+        movePanel.add(createButtonWithArrow(rightArrow)); // Flecha derecha
+        movePanel.add(createButtonWithArrow(downLeftArrow)); // Flecha abajo izquierda
+        movePanel.add(createButtonWithArrow(downArrow)); // Flecha abajo
+        movePanel.add(createButtonWithArrow(downRightArrow)); // Flecha abajo derecha
+ 
+
+
+        actionOptionsPanel.add(placePanel, "Place");
+        actionOptionsPanel.add(movePanel, "Move");
+    
+        controlPanel.add(actionOptionsPanel);
+        rightPanel.add(controlPanel, BorderLayout.NORTH);
+    
+        // Información de barreras
+        JPanel barrierInfoPanel = new JPanel(new BorderLayout());
+        JLabel remainingBarriersLabel = new JLabel("Barreras Restantes:");
+        JTable barrierTable = new JTable(new String[][] {{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[] {"Tipo de Barrera", "Cantidad"});
+        JScrollPane scrollPane = new JScrollPane(barrierTable);
+        barrierInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
+        barrierInfoPanel.add(scrollPane, BorderLayout.CENTER);
+        rightPanel.add(barrierInfoPanel, BorderLayout.CENTER);
+    
+        // Botón de rendirse
+        giveUp = new JButton("Give Up");
+        rightPanel.add(giveUp, BorderLayout.SOUTH);
+    
+        gameBoardPanel.add(rightPanel, BorderLayout.EAST);
+    
+        // Panel inferior - Tiempo y turno
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+        JLabel turnLabel = new JLabel("Turno:");
+        JLabel currentPlayerLabel = new JLabel();
+        JLabel timerLabel = new JLabel("Tiempo: 00:00");
+        bottomPanel.add(turnLabel);
+        bottomPanel.add(currentPlayerLabel);
+        bottomPanel.add(timerLabel);
+        gameBoardPanel.add(bottomPanel, BorderLayout.SOUTH);
+    
+        principal.add(gameBoardPanel, "gameBoard");
+    
+        // Acción de botones
+        placeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CardLayout cl = (CardLayout) (actionOptionsPanel.getLayout());
+                cl.show(actionOptionsPanel, "Place");
+            }
+        });
+    
+        moveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CardLayout cl = (CardLayout) (actionOptionsPanel.getLayout());
+                cl.show(actionOptionsPanel, "Move");
+            }
+        });
+    }
+    
         
     private void prepareActions()
     {
@@ -366,23 +489,6 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
-        game1.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent ev){
-                fileAction();
-            }
-        });
-
-        game2.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent ev){
-                fileAction();
-            }
-        });
-
-        game3.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent ev){
-                fileAction();
-            }
-        });
 
         machine.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ev){
@@ -446,17 +552,26 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
+        
+        submitButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                submitConfiguration();
+                
+            }
+        });
+
         giveUp.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev){
                 giveUpAction();
             }
         });
+
     }
 
     private void newGameAction(){
 
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseSpace");
+                cl.show(principal, "choseOpponent");
         
     }
 
@@ -464,7 +579,7 @@ public class QuoridorGUI extends JFrame {
 
       
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseSpace");
+                cl.show(principal, "chose");
     }
 
     private void fileAction(){
@@ -508,6 +623,7 @@ public class QuoridorGUI extends JFrame {
 
     }
 
+
     private void checkReady() {
         if (player1Ready && player2Ready) {
             String player1Name = name1.getText().trim();
@@ -516,16 +632,50 @@ public class QuoridorGUI extends JFrame {
             if (!player1Name.isEmpty() && !player2Name.isEmpty() && player1Color != null && player2Color != null) {
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
-    
-                showGameBoardScreen(player1Name, player2Name, player1Color, player2Color);
+                
+                CardLayout cl = (CardLayout) principal.getLayout();
+                    cl.show(principal, "choseSpecials");
+                
             } else {
+                player1Ready=false;
+                player2Ready=false;
                 JOptionPane.showMessageDialog(this, "Por favor ingresa nombres y selecciona colores para ambos jugadores.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+
+    private void submitConfiguration() {
+        try {
+            int normalBarriers = Integer.parseInt(normalBarriersField.getText());
+            int temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
+            int longBarriers = Integer.parseInt(longBarriersField.getText());
+            int alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
+            int totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
+
+
+            int sumOfSpecialTiles = 0;
+            for (int i = 0; i < specialTileCheckBoxes.size(); i++) {
+                JCheckBox checkBox = specialTileCheckBoxes.get(i);
+                if (checkBox.isSelected()) {
+                    int quantity = Integer.parseInt(specialTileQuantityFields.get(i).getText());
+                    sumOfSpecialTiles += quantity;
+                    String type = checkBox.getText();
+                }
+            }
+
+            if (sumOfSpecialTiles != totalSpecialTiles) {
+                JOptionPane.showMessageDialog(this, "The total quantity of special tiles does not match the specified total.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Configuration set successfully!");
+                showGameBoardScreen();
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for all barriers and special tiles.");
+        }
+    }
     
 
-    private void showGameBoardScreen(String player1Name, String player2Name, Color player1Color, Color player2Color) {
+    private void showGameBoardScreen() {
     
         CardLayout cl = (CardLayout) principal.getLayout();
         cl.show(principal, "gameBoard");
@@ -538,7 +688,44 @@ public class QuoridorGUI extends JFrame {
         Quoripoob= new QuoridorGame();
     }
 
+    public String getColorName(Color color) {
+    if (color.equals(Color.BLACK)) {
+        return "Negro";
+    } else if (color.equals(Color.BLUE)) {
+        return "Azul";
+    } else if (color.equals(Color.CYAN)) {
+        return "Cian";
+    } else if (color.equals(Color.DARK_GRAY)) {
+        return "Gris Oscuro";
+    } else if (color.equals(Color.GRAY)) {
+        return "Gris";
+    } else if (color.equals(Color.GREEN)) {
+        return "Verde";
+    } else if (color.equals(Color.LIGHT_GRAY)) {
+        return "Gris Claro";
+    } else if (color.equals(Color.MAGENTA)) {
+        return "Magenta";
+    } else if (color.equals(Color.ORANGE)) {
+        return "Naranja";
+    } else if (color.equals(Color.PINK)) {
+        return "Rosado";
+    } else if (color.equals(Color.RED)) {
+        return "Rojo";
+    } else if (color.equals(Color.WHITE)) {
+        return "Blanco";
+    } else if (color.equals(Color.YELLOW)) {
+        return "Amarillo";
+    } else {
+        return "Desconocido";
+    }
+}
 
+    private static JButton createButtonWithArrow(String arrow) {
+        JButton button = new JButton(arrow);
+        button.setFont(new Font("Arial", Font.PLAIN, 24)); // Ajustar tamaño de la fuente
+        button.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Establecer un borde
+        return button;
+    }
     
 
     public static void main(String args[]){
