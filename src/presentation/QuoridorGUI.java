@@ -51,7 +51,7 @@ public class QuoridorGUI extends JFrame {
 
     private JPanel gameBoardPanel, QuoridorBoard;
     private JLabel barrierTypeLabel;
-    private JButton forward,left,right,back,leftForward,rightForward,leftBack,rightBack,giveUp,putBarrier;
+    private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier;
 
 
 
@@ -336,7 +336,7 @@ public class QuoridorGUI extends JFrame {
         leftPanel.add(player2Panel);
     
         QuoridorBoard = new QuoridorBoard(Quoripoob);
-        QuoridorBoard.setPreferredSize(new Dimension(600, 600));
+        QuoridorBoard.setPreferredSize(new Dimension(800, 800));
         gameBoardPanel.add(QuoridorBoard, BorderLayout.CENTER);
     
         JPanel player1Panel = new JPanel(new BorderLayout());
@@ -386,25 +386,24 @@ public class QuoridorGUI extends JFrame {
         JPanel movePanel = new JPanel(new GridLayout(3, 3));
 
         // Flechas para las direcciones
-        String upArrow = "\u2191"; // ↑
-        String downArrow = "\u2193"; // ↓
-        String leftArrow = "\u2190"; // ←
-        String rightArrow = "\u2192"; // →
-        String upLeftArrow = "\u2196"; // ↖
-        String upRightArrow = "\u2197"; // ↗
-        String downLeftArrow = "\u2199"; // ↙
-        String downRightArrow = "\u2198"; // ↘
+        upArrowButton=createButtonWithArrow( "\u2191"); // ↑
+        downArrowButton=createButtonWithArrow("\u2193"); // ↓
+        leftArrowButton=createButtonWithArrow("\u2190"); // ←
+        rightArrowButton=createButtonWithArrow("\u2192"); // →
+        upLeftArrowBurButton=createButtonWithArrow("\u2196"); // ↖
+        upRightArrowButton=createButtonWithArrow("\u2197"); // ↗
+        downLeftArrowButton=createButtonWithArrow("\u2199"); // ↙
+        downRightArrowButton=createButtonWithArrow("\u2198"); // ↘
 
-        // Botones con flechas para las direcciones
-        movePanel.add(createButtonWithArrow(upLeftArrow)); // Flecha arriba izquierda
-        movePanel.add(createButtonWithArrow(upArrow)); // Flecha arriba
-        movePanel.add(createButtonWithArrow(upRightArrow)); // Flecha arriba derecha
-        movePanel.add(createButtonWithArrow(leftArrow)); // Flecha izquierda
-        movePanel.add(new JLabel()); // Espacio vacío
-        movePanel.add(createButtonWithArrow(rightArrow)); // Flecha derecha
-        movePanel.add(createButtonWithArrow(downLeftArrow)); // Flecha abajo izquierda
-        movePanel.add(createButtonWithArrow(downArrow)); // Flecha abajo
-        movePanel.add(createButtonWithArrow(downRightArrow)); // Flecha abajo derecha
+        movePanel.add(upLeftArrowBurButton); 
+        movePanel.add(upArrowButton); 
+        movePanel.add(upRightArrowButton); 
+        movePanel.add(leftArrowButton); 
+        movePanel.add(new JLabel()); 
+        movePanel.add(rightArrowButton); 
+        movePanel.add(downLeftArrowButton); 
+        movePanel.add(downArrowButton); 
+        movePanel.add(downRightArrowButton); 
  
 
 
