@@ -7,7 +7,7 @@ public class barrier {
 
     protected String color;
     private boolean orientation;
-    protected box positionI; 
+    
 
     /**
      * Constructs a barrier with the specified orientation.
@@ -17,7 +17,6 @@ public class barrier {
     public barrier(boolean orientation){
         color = "black";
         this.orientation = orientation;
-        positionI = null;
     }
 }
 

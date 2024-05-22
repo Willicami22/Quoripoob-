@@ -7,7 +7,11 @@ import java.util.Random;
 
 public class machine extends playerTab {
 
-    public machine(box boxPosition, Color color, String name, int winningRow ){
+
+    private String difficult;
+
+    public machine(box boxPosition, Color color, String name, int winningRow,String diffilcult ){
         super(boxPosition, color, name, winningRow);
+        this.difficult=diffilcult;
     }
 }

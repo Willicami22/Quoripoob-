@@ -77,6 +77,11 @@ public class box {
     public void placeBarrier(barrier barrier, String direction){
         barriers.put(direction, barrier);
     }
+
+    public void eraseBarrier(String direction){
+        barriers.put(direction, null);
+
+    }
  }
 
 

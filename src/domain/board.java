@@ -10,7 +10,6 @@ public class board {
 
     private int size;
     private box[][] boxes;
-    private List<barrier> barriers;
 
     /**
      * Constructs a board with the specified size.
@@ -25,7 +24,6 @@ public class board {
                 boxes[i][j] = new box(i, j);
             }
         }
-        barriers = new ArrayList<>();
     }
 
     /**

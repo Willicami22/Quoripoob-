@@ -55,6 +55,7 @@ public class playerTab {
      */
     public void setCurrentBox(box newBox){
         position = newBox;
+        movements.add(newBox);
     }
 
     /**
@@ -82,5 +83,9 @@ public class playerTab {
      */
     public Color getColor(){
         return color;
+    }
+
+    public int getWinningRow(){
+        return winningRow;
     }
 }

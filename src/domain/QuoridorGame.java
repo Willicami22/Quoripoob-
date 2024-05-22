@@ -3,6 +3,8 @@ package domain;
 import java.awt.Color;
 import java.util.*;
 
+import java.io.*;
+
 import javax.swing.JOptionPane;
 
 
@@ -20,6 +22,8 @@ public class QuoridorGame  {
     private String mode;
     private boolean isNew;
     private String difficult;
+    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
 
 
 
@@ -78,8 +82,15 @@ public class QuoridorGame  {
     public void setPlayers(int player, String name, Color color){
         box BoxInit = (player == 0) ? board.getBox(0, 4) : board.getBox(8, 4);
         int winningRow = (player == 0) ? 8 : 0;
-        playerTab playerGame = new playerTab(BoxInit, color, name, winningRow);  
-        players[player] = playerGame;
+        if(player==1 || (player==2 && !vsMachine)){
+            player playerGame = new player(BoxInit, color, name, winningRow);  
+            players[player] = playerGame;
+        }
+        else {
+            machine playerGame = new machine(BoxInit, color, name, winningRow, difficult);
+            players[player] = playerGame;
+        }
+    
     }
 
     /**
@@ -88,23 +99,44 @@ public class QuoridorGame  {
      * @param direction The direction in which to move the player's piece.
      * @throws QuoripoobException If an error occurs during the move.
      */
-    public void moveTab(String direction) throws QuoripoobException{
-        if (actualPlayer >= 0 && actualPlayer < players.length){
-            playerTab currentPlayer = players[actualPlayer];
-            box currentBox = currentPlayer.getCurrentBox();
-            int[] newPosition= new int[2]; newPosition[0]=currentBox.getRow();newPosition[1]=currentBox.getColumn();
-            newPosition=obtainNewPosition(direction, newPosition);
-            boolean comprobePlayer=comprobePlayer(newPosition[1],newPosition[0]);
-            if(comprobePlayer && !(direction.equals("SE") || direction.equals("SW")|| direction.equals("NE") || direction.equals("WE"))){
-                newPosition=obtainNewPosition(direction, newPosition);
-            }
-            if (isValidMove(newPosition[0], newPosition[1], direction)) {
-                currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
-                comprobeWinner();
-                actualPlayer = (actualPlayer + 1) % players.length;
-            }
+    public void moveTab(String direction) throws QuoripoobException {
+        if (actualPlayer < 0 || actualPlayer >= players.length) {
+            throw new QuoripoobException("Invalid player index.");
+        }
+    
+        playerTab currentPlayer = players[actualPlayer];
+        if (currentPlayer == null) {
+            throw new QuoripoobException("Current player not found.");
+        }
+    
+        box currentBox = currentPlayer.getCurrentBox();
+        if (currentBox == null) {
+            throw new QuoripoobException("Current box not found for player.");
+        }
+    
+        int[] newPosition = new int[2];
+        newPosition[0] = currentBox.getRow();
+        newPosition[1] = currentBox.getColumn();
+        newPosition = obtainNewPosition(direction, newPosition);
+    
+        boolean comprobePlayer = comprobePlayer(newPosition[1], newPosition[0]);
+        if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("WE"))) {
+            newPosition = obtainNewPosition(direction, newPosition);
+        }
+    
+        if (!isValidMove(newPosition[0], newPosition[1], direction)) {
+            throw new QuoripoobException("Invalid move.");
+        }
+    
+        currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
+        comprobeWinner();
+        actualPlayer = (actualPlayer + 1) % players.length;
+
+        if(vsMachine){
+            playMachine();
         }
     }
+    
 
     /**
      * Obtains the new position based on the current position and direction.
@@ -167,14 +199,35 @@ public class QuoridorGame  {
             board.getBox(rowInit, columnInit + 1).placeBarrier(barrier,"S");
             board.getBox(rowInit+1, columnInit).placeBarrier(barrier,"N");
             board.getBox(rowInit+1, columnInit + 1).placeBarrier(barrier,"N");
+            if(!canPlayerWin()){
+                board.getBox(rowInit, columnInit).eraseBarrier("S");
+                board.getBox(rowInit, columnInit + 1).eraseBarrier("S");
+                board.getBox(rowInit+1, columnInit).eraseBarrier("N");
+                board.getBox(rowInit+1, columnInit + 1).eraseBarrier("N");
+                throw new QuoripoobException("El camino bloquea al jugador"); 
+
+            }
         } else if (orientation.equals("V")) {
             barrier barrier= new barrier(false);
             board.getBox(rowInit, columnInit-1).placeBarrier(barrier,"E");
             board.getBox(rowInit , columnInit).placeBarrier(barrier,"W");
             board.getBox(rowInit+1, columnInit-1).placeBarrier(barrier,"E");
             board.getBox(rowInit+1 , columnInit).placeBarrier(barrier,"W");
+            if(!canPlayerWin()){
+                board.getBox(rowInit, columnInit-1).eraseBarrier("E");
+                board.getBox(rowInit , columnInit).eraseBarrier("W");
+                board.getBox(rowInit+1, columnInit-1).eraseBarrier("E");
+                board.getBox(rowInit+1 , columnInit).eraseBarrier("W");
+                throw new QuoripoobException("El camino bloquea al jugador"); 
+            }
         } else {
             throw new QuoripoobException("Invalid orientation");
+        }
+
+        if (vsMachine) {
+
+            playMachine();
+            
         }
     }
 
@@ -186,7 +239,7 @@ public class QuoridorGame  {
      * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
      * @return true if the barrier placement is valid, false otherwise.
      */
-    public boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation){
+    private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation){
         if (rowInit < 0 && rowInit > board.getSize() && columnInit < 0 && columnInit > board.getSize() ){
             return false;
         }
@@ -215,38 +268,73 @@ public class QuoridorGame  {
     /**
      * Plays the machine's turn based on the selected difficulty level.
      */
-    public void playMachine(){
+    public void playMachine() throws QuoripoobException{
         if(difficult.equals("begginer")){
-            Random random = new Random();
-            int randomNumber = random.nextInt(2) + 1;
+            
+            playBeginner();
 
-            if(randomNumber == 1){
-                moveTabBegginer();
-            }
-            else {
-                putBarrierBegginer();
-            }
         }
         else if(difficult.equals("intermediate")){
-            // Implement intermediate difficulty level logic
-        }
+
+            playIntermediate();
+
+            }
         else{
             // Implement advanced difficulty level logic
         }
+        
+        actualPlayer = (actualPlayer + 1) % players.length;
     }
 
     /**
-     * Moves the player's piece in the beginner mode.
+     * Plays a beginner-level move for the machine player.
+     * 
+     * @throws QuoripoobException If an error occurs during the move.
      */
-    public void moveTabBegginer(){
-        // Implement movement logic for beginner mode
+    public void playBeginner() throws QuoripoobException {
+        if (!vsMachine) {
+            throw new QuoripoobException("This method can only be called when playing against the machine.");
+        }
+
+        if (actualPlayer == 1) {
+            Random random = new Random();
+
+            int randomAction = random.nextInt(2);
+
+            if (randomAction == 0) {
+                
+                String[] directions = {"N", "S", "E", "W", "NE", "NW", "SE", "SW"};
+                String randomDirection = directions[random.nextInt(directions.length)];
+                try {
+                    moveTab(randomDirection);
+                } catch (QuoripoobException e) {
+                    Log.record(e);
+                    playBeginner();
+                }
+            } else {
+                
+                int row = random.nextInt(board.getSize());
+                int col = random.nextInt(board.getSize());
+                String orientation = random.nextBoolean() ? "H" : "V";
+                try {
+                    putBarrier(row, col, orientation);
+                } catch (QuoripoobException e) {
+                    
+                    Log.record(e);
+                    playBeginner();
+                }
+            }
+        }
     }
 
-    /**
-     * Places a barrier in the beginner mode.
-     */
-    public void putBarrierBegginer(){
-        // Implement barrier placement logic for beginner mode
+
+    public void playIntermediate() throws QuoripoobException{
+        if (!vsMachine) {
+            throw new QuoripoobException("This method can only be called when playing against the machine.");
+        }
+
+        else{}
+
     }
 
     /**
@@ -428,5 +516,141 @@ public class QuoridorGame  {
     public playerTab getActualPlayer(){ 
         return players[actualPlayer];
     }
-}
 
+    public boolean canPlayerWin() {
+        playerTab currentPlayer = players[actualPlayer];
+        Set<box> visited = new HashSet<>();
+        Queue<box> queue = new ArrayDeque<>();
+        
+        // Add the player's initial position to the queue and mark it as visited
+        queue.offer(currentPlayer.getCurrentBox());
+        visited.add(currentPlayer.getCurrentBox());
+        
+        while (!queue.isEmpty()) {
+            box currentBox = queue.poll();
+            int row = currentBox.getRow();
+            int col = currentBox.getColumn();
+            
+            // Check if the player has reached their winning row
+            if (row == currentPlayer.getWinningRow()) {
+                return true;
+            }
+            
+            // Expand unvisited neighboring boxes
+            for (int[] dir : DIRECTIONS) {
+                
+                int newRow = row + dir[0];
+                int newCol = col + dir[1];
+                String movement;
+                if(dir[0]==-1 && dir[1]==0){
+                    movement="S";
+                }
+                else if(dir[0]==0 && dir[1]==-1){
+                    movement="W";
+                }
+                else if(dir[0]==1 && dir[1]==0){
+                    movement="N";
+                }
+                else{
+                    movement="E";
+                }
+
+                // Check if the new position is within the board and has not been visited
+                if (!visited.contains(board.getBox(newRow, newCol)) && isValidMove(newRow, newCol, movement)) {
+                    {
+                        queue.offer(board.getBox(newRow, newCol));
+                        visited.add(board.getBox(newRow, newCol));  
+                    }
+                }
+            }
+        }
+        
+        // The player cannot win if they don't reach their winning row
+        return false;
+    }
+    
+
+    /**
+     * Saves the current state of the game to a file.
+     * 
+     * @param file The file to which the game state will be saved.
+     * @throws QuoripoobException If an error occurs while saving the game state.
+     */
+    public void save(File file) throws QuoripoobException {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+            outputStream.writeObject(this);
+        } catch (FileNotFoundException e) {
+            Log.record(e);
+            throw new QuoripoobException("No se puede encontrar el archivo para guardar el Juego: " + e.getMessage());
+        } catch (IOException e) {
+            Log.record(e);
+            throw new QuoripoobException("Error al guardar la partida: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Opens a file containing a previously saved state of the game.
+     * 
+     * @param file The file to be opened to load the game state.
+     * @return The game loaded from the file.
+     * @throws QuoripoobException If an error occurs while opening or loading the game from the file.
+     */
+    public static QuoridorGame open(File file) throws QuoripoobException {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+            return (QuoridorGame) inputStream.readObject();
+        } catch (FileNotFoundException e) {
+            throw new QuoripoobException("No se puede encontrar el archivo para abrir la partida: " + e.getMessage());
+        } catch (IOException e) {
+            throw new QuoripoobException("Error al abrir el archivo: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            throw new QuoripoobException("No se puede encontrar la clase necesaria para abrir la partida: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Exports the current state of the game to a file.
+     * 
+     * @param file The file to which the game state will be exported.
+     * @throws QuoripoobException If an error occurs while exporting the game state.
+     */
+    public void export(File file) throws QuoripoobException {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+            outputStream.writeObject(this);
+        } catch (IOException e) {
+            throw new QuoripoobException("Error al exportar el estado del jardín: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Imports data from a file and updates the game state.
+     * 
+     * @param file The file from which data will be imported.
+     * @throws QuoripoobException If an error occurs while importing and updating the game state from the file.
+     */
+    public void importData(File file) throws QuoripoobException {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+            Object obj = inputStream.readObject();
+            if (obj instanceof QuoridorGame) {
+                QuoridorGame importedQuoridor = (QuoridorGame) obj;
+                this.board  = importedQuoridor.board;
+                this.actualPlayer = importedQuoridor.actualPlayer;
+                this.vsMachine= importedQuoridor.vsMachine;
+                this.difficult=importedQuoridor.difficult;
+                this.mode=importedQuoridor.mode;
+                this.players=importedQuoridor.players;
+                isNew=false;
+            } else {
+                throw new QuoripoobException("El archivo no contiene un jardín válido.");
+            }
+        } catch (IOException e) {
+            throw new QuoripoobException("Error al importar los datos: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            throw new QuoripoobException("Error al importar los datos: Clase no encontrada - " + e.getMessage());
+        } catch (ClassCastException e) {
+            throw new QuoripoobException("Error al importar los datos: No se puede convertir a un objeto Garden - " + e.getMessage());
+        } catch (Exception e) {
+            throw new QuoripoobException("Error al importar los datos: " + e.getMessage());
+        }
+    }
+}
