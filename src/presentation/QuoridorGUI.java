@@ -49,8 +49,8 @@ public class QuoridorGUI extends JFrame {
     private JButton submitButton;
  
 
-    private JPanel gameBoardPanel, QuoridorBoard;
-    private JLabel barrierTypeLabel;
+    private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
+    private JLabel player1Label, player2Label,barrierTypeLabel;
     private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier;
 
 
@@ -321,40 +321,39 @@ public class QuoridorGUI extends JFrame {
     
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
+
+        principalGBL = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
     
         // Panel izquierdo - Información de los jugadores
         JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.setPreferredSize(new Dimension(400, 800)); // Aumenta el ancho y la altura del panel izquierdo
     
-        JPanel player2Panel = new JPanel(new BorderLayout());
-        JLabel player2Label = new JLabel("J2:");
-        JLabel player2NameLabel = new JLabel(name1.getText());
-        JLabel player2ColorLabel = new JLabel();
-        player2Panel.add(player2Label, BorderLayout.NORTH);
-        player2Panel.add(player2NameLabel, BorderLayout.CENTER);
-        player2Panel.add(player2ColorLabel, BorderLayout.SOUTH);
+        player2Panel = new JPanel(new FlowLayout());
+        player2Label = new JLabel(name2.getText());
+        player2Label.setBackground(player2Color);
+        player2Panel.add(player2Label);
         leftPanel.add(player2Panel, BorderLayout.NORTH);
     
         QuoridorBoard = new QuoridorBoard(Quoripoob);
-        QuoridorBoard.setPreferredSize(new Dimension(800, 800)); // Ajusta las dimensiones del tablero
-        leftPanel.add(QuoridorBoard,BorderLayout.CENTER); // Agrega el tablero al panel izquierdo
+        leftPanel.add(QuoridorBoard, BorderLayout.CENTER); // Agrega el tablero al panel izquierdo
+        
+        player1Panel = new JPanel(new FlowLayout());
+        player1Label = new JLabel(name1.getText());
+        player1Label.setBackground(player1Color);
+        player1Panel.add(player1Label);
+        leftPanel.add(player2Label, BorderLayout.SOUTH);
     
-        JPanel player1Panel = new JPanel(new BorderLayout());
-        JLabel player1Label = new JLabel("J1:");
-        JLabel player1NameLabel = new JLabel(name1.getText());
-        JLabel player1ColorLabel = new JLabel();
-        player1Panel.add(player1Label, BorderLayout.NORTH);
-        player1Panel.add(player1NameLabel, BorderLayout.CENTER);
-        player1Panel.add(player1ColorLabel, BorderLayout.SOUTH);
-        leftPanel.add(player1Panel,BorderLayout.SOUTH);
-    
-        gameBoardPanel.add(leftPanel, BorderLayout.WEST);
-    
-        // Panel derecho - Controles del juego
-        JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setPreferredSize(new Dimension(300, 600));
-    
-        JPanel controlPanel = new JPanel(new GridLayout(2, 1));
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 3;
+    // El area de texto debe estirarse en ambos sentidos.
+        constraints.fill = GridBagConstraints.BOTH; 
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        principalGBL.add (leftPanel, constraints);
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
     
         // Panel de selección de acción (Colocar o Mover)
         JPanel actionPanel = new JPanel();
@@ -370,7 +369,12 @@ public class QuoridorGUI extends JFrame {
         actionPanel.add(moveButton);
         actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
 
-        controlPanel.add(actionPanel);
+        constraints.gridx = 2;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.NONE; 
+        principalGBL.add (actionPanel, constraints);
         
         JPanel actionOptionsPanel = new JPanel(new CardLayout());
     
@@ -418,8 +422,14 @@ public class QuoridorGUI extends JFrame {
         actionOptionsPanel.add(placePanel, "Place");
         actionOptionsPanel.add(movePanel, "Move");
     
-        controlPanel.add(actionOptionsPanel);
-        rightPanel.add(controlPanel, BorderLayout.NORTH);
+        constraints.gridx = 2;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+    // El area de texto debe estirarse en ambos sentidos.
+        constraints.fill = GridBagConstraints.BOTH; 
+        constraints.weighty = 1.0;
+        principalGBL.add (actionOptionsPanel, constraints);
     
         // Información de barreras
         JPanel barrierInfoPanel = new JPanel(new BorderLayout());
@@ -428,13 +438,25 @@ public class QuoridorGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(barrierTable);
         barrierInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
         barrierInfoPanel.add(scrollPane, BorderLayout.CENTER);
-        rightPanel.add(barrierInfoPanel, BorderLayout.CENTER);
+
+        constraints.gridx = 2;
+        constraints.gridy = 2;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.BOTH; 
+        principalGBL.add (barrierInfoPanel, constraints);
+        constraints.weighty = 0.0;
     
         // Botón de rendirse
         giveUp = new JButton("Give Up");
-        rightPanel.add(giveUp, BorderLayout.SOUTH);
+        constraints.gridx = 2;
+        constraints.gridy = 3;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.BOTH; 
+        principalGBL.add (giveUp, constraints);
     
-        gameBoardPanel.add(rightPanel, BorderLayout.EAST);
+        gameBoardPanel.add(principalGBL, BorderLayout.CENTER);
     
         // Panel inferior - Tiempo y turno
         JPanel bottomPanel = new JPanel(new FlowLayout());
