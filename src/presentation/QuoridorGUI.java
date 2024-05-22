@@ -722,7 +722,8 @@ public class QuoridorGUI extends JFrame {
 
     private static JButton createButtonWithArrow(String arrow) {
         JButton button = new JButton(arrow);
-        button.setFont(new Font("Arial", Font.PLAIN, 24)); // Ajustar tamaño de la fuente
+        button.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24)); // Seleccionar una fuente que soporte los caracteres Unicode
+        button.setFocusPainted(false); // Eliminar el borde alrededor del texto
         button.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Establecer un borde
         return button;
     }
