@@ -54,6 +54,7 @@ public class QuoridorGUI extends JFrame {
  
     private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
     private JLabel player1Label, player2Label,barrierTypeLabel;
+    private String player1Name, player2Name;
     private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier, save;
 
 
@@ -320,6 +321,20 @@ public class QuoridorGUI extends JFrame {
         setPlayers.setRightComponent(player2);
     
         principal.add(setPlayers, "setPlayers");
+
+        ok1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player1Label.setText(name1.getText()); // Guardar el nombre del jugador 1
+            }
+        });
+
+        ok2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player2Label.setText(name2.getText()); // Guardar el nombre del jugador 2
+            }
+        });
     }
     
     private void prepareElementsGameBoard() {
@@ -331,8 +346,7 @@ public class QuoridorGUI extends JFrame {
         // Panel izquierdo - Información de los jugadores
     
         player2Panel = new JPanel(new FlowLayout());
-        player2Label = new JLabel("JUGADOR 2");
-        player2Label.setBackground(player2Color);
+        player2Label = new JLabel(player2Name != null ? player2Name : "JUGADOR 2");
         player2Panel.add(player2Label);
 
         //Añadir la información del player 2 al principalGBL
@@ -359,8 +373,7 @@ public class QuoridorGUI extends JFrame {
         constraints.weighty = 0.0;
         
         player1Panel = new JPanel(new FlowLayout());
-        player1Label = new JLabel("JUGADOR 1");
-        player1Label.setBackground(player1Color);
+        player1Label = new JLabel(player1Name != null ? player1Name : "JUGADOR 1");
         player1Panel.add(player1Label);
         
         //Añadir la información del player 1 al principalGBL
