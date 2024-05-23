@@ -10,6 +10,8 @@ import javax.swing.event.*;
 import domain.Log;
 import domain.QuoridorGame;
 import domain.QuoripoobException;
+import domain.allied;
+import domain.temporary;
 
 import java.util.*;
 import javax.swing.*;
@@ -463,19 +465,82 @@ public class QuoridorGUI extends JFrame {
         principalGBL.add (actionOptionsPanel, constraints);
     
         // Información de barreras
-        JPanel barrierInfoPanel = new JPanel(new BorderLayout());
-        JLabel remainingBarriersLabel = new JLabel("Barreras Restantes:");
-        JTable barrierTable = new JTable(new String[][] {{"Normal", "10"}, {"Allied", "5"}, {"Temporary", "3"}, {"Large", "2"}}, new String[] {"Tipo de Barrera", "Cantidad"});
-        JScrollPane scrollPane = new JScrollPane(barrierTable);
-        barrierInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
-        barrierInfoPanel.add(scrollPane, BorderLayout.CENTER);
+        JPanel infoPanel = new JPanel(new GridLayout(2, 1));
+
+        JPanel barriersInfoPanel = new JPanel(new BorderLayout());
+        JLabel remainingBarriersLabel = new JLabel("REMAINING BARRIERS", SwingConstants.CENTER);
+        JPanel remainingBarriersGrid = new JPanel(new GridLayout(5, 2));
+
+        JLabel barrierTypeLabel = new JLabel("Type of barrier");
+        JLabel amountALabel = new JLabel("Amount");
+
+        JLabel normalALabel = new JLabel("Normal:");
+        JLabel amountNormalLabel = new JLabel("10");
+        JLabel alliedLabel = new JLabel("Allied:");
+        JLabel amountAlliedLabel = new JLabel("20");
+        JLabel temporaryLabel = new JLabel("Temporary:");
+        JLabel amountTemporaryLabel = new JLabel("30");
+        JLabel largeLabel = new JLabel("Large:");
+        JLabel amountLargeLabel = new JLabel("40");
+
+        remainingBarriersGrid.add(barrierTypeLabel);
+        remainingBarriersGrid.add(amountALabel);
+        remainingBarriersGrid.add(normalALabel);
+        remainingBarriersGrid.add(amountNormalLabel);
+        remainingBarriersGrid.add(alliedLabel);
+        remainingBarriersGrid.add(amountAlliedLabel);
+        remainingBarriersGrid.add(temporaryLabel);
+        remainingBarriersGrid.add(amountTemporaryLabel);
+        remainingBarriersGrid.add(largeLabel);
+        remainingBarriersGrid.add(amountLargeLabel);
+        
+
+        barriersInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
+        barriersInfoPanel.add(remainingBarriersGrid, BorderLayout.CENTER);
+
+        //información de casillas visitadas
+
+        JPanel boxesInfoPanel = new JPanel(new BorderLayout());
+
+        JLabel visitedBoxesLabel = new JLabel("VISITED BOXES", SwingConstants.CENTER);
+        JPanel visitedBoxesGrid = new JPanel(new GridLayout(5, 2));
+
+        JLabel boxesTypeLabel = new JLabel("Type of box");
+        JLabel amountLabel = new JLabel("Amount");
+        
+        JLabel normalLabel = new JLabel("Normal:");
+        JLabel amountNormalBoxesLabel = new JLabel("10");
+        JLabel teleporterLabel = new JLabel("Teleporter:");
+        JLabel amountTeleporterLabel = new JLabel("20");
+        JLabel goBackLabel = new JLabel("Go back:");
+        JLabel amountGoBackLabel = new JLabel("30");
+        JLabel doubleShiftLabel = new JLabel("Double Shift:");
+        JLabel amountDoubleShiftLabel = new JLabel("40");
+
+        visitedBoxesGrid.add(boxesTypeLabel);
+        visitedBoxesGrid.add(amountLabel);
+        visitedBoxesGrid.add(normalLabel);
+        visitedBoxesGrid.add(amountNormalBoxesLabel);
+        visitedBoxesGrid.add(teleporterLabel);
+        visitedBoxesGrid.add(amountTeleporterLabel);
+        visitedBoxesGrid.add(goBackLabel);
+        visitedBoxesGrid.add(amountGoBackLabel);
+        visitedBoxesGrid.add(doubleShiftLabel);
+        visitedBoxesGrid.add(amountDoubleShiftLabel);
+
+        boxesInfoPanel.add(visitedBoxesLabel, BorderLayout.NORTH);
+        boxesInfoPanel.add(visitedBoxesGrid, BorderLayout.CENTER);
+
+        
+        infoPanel.add(barriersInfoPanel);
+        infoPanel.add(boxesInfoPanel);
 
         constraints.gridx = 2;
         constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.BOTH; 
-        principalGBL.add (barrierInfoPanel, constraints);
+        principalGBL.add (infoPanel, constraints);
         constraints.weighty = 0.0;
     
         // Botón de rendirse
