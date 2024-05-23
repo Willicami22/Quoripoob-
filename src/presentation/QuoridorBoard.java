@@ -45,6 +45,7 @@ public class QuoridorBoard extends JPanel {
             g.fillOval(x, y, size, size); 
         }
     }
+
 }
 
 

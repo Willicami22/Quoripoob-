@@ -15,6 +15,7 @@ import java.util.*;
 import javax.swing.*;
 
 
+
 public class QuoridorGUI extends JFrame {
     public static final int Widht=800, Height=800;
     private static final Dimension PREFERRED_DIMENSION =
@@ -61,7 +62,7 @@ public class QuoridorGUI extends JFrame {
 
     public QuoridorGUI(){
 
-        Quoripoob= new QuoridorGame();
+        Quoripoob=new QuoridorGame();
         prepareElements();
         prepareActions();
     }
@@ -329,10 +330,10 @@ public class QuoridorGUI extends JFrame {
         // Panel izquierdo - Información de los jugadores
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setPreferredSize(new Dimension(400, 800)); // Aumenta el ancho y la altura del panel izquierdo
-    
+        
         JPanel player2Panel = new JPanel(new BorderLayout());
         JLabel player2Label = new JLabel("J2:");
-        JLabel player2NameLabel = new JLabel(name1.getText());
+        JLabel player2NameLabel = new JLabel();
         JLabel player2ColorLabel = new JLabel();
         player2Panel.add(player2Label, BorderLayout.NORTH);
         player2Panel.add(player2NameLabel, BorderLayout.CENTER);
@@ -345,7 +346,7 @@ public class QuoridorGUI extends JFrame {
     
         JPanel player1Panel = new JPanel(new BorderLayout());
         JLabel player1Label = new JLabel("J1:");
-        JLabel player1NameLabel = new JLabel(name1.getText());
+        JLabel player1NameLabel = new JLabel();
         JLabel player1ColorLabel = new JLabel();
         player1Panel.add(player1Label, BorderLayout.NORTH);
         player1Panel.add(player1NameLabel, BorderLayout.CENTER);
@@ -587,6 +588,66 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
+        upArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("S");;
+            }
+        });
+
+        downArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("N");;
+            }
+        });
+
+        rightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("W");;
+            }
+        });
+
+        leftArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("E");;
+            }
+        });
+        
+        upLeftArrowBurButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("SW");;
+            }
+        });
+
+        upRightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("SE");
+            }
+        });
+
+        downLeftArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("NW");;
+            }
+        });
+
+        downRightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("NE");
+            }
+        });
+
+    }
+
+    private void moveAction(String direction){
+
+        try{
+            Quoripoob.moveTab(direction);
+            QuoridorBoard.repaint();
+
+        }  
+        catch(QuoripoobException e){
+            
+        }  
     }
 
     private void newGameAction(){

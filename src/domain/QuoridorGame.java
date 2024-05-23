@@ -19,31 +19,21 @@ public class QuoridorGame implements Serializable {
     private playerTab[] players;
     private board board;
     private int actualPlayer;
-    private boolean vsMachine;
+    private boolean vsMachine=true;
     private String mode;
-    private boolean isNew;
     private String difficult;
     private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
 
 
 
-    public QuoridorGame(){  
+    public QuoridorGame(){
         
-        isNew=true;
+    
         board= new board(9);
         players= new playerTab[2];
         actualPlayer=0;
 
-    }
-
-        /**
-     * Checks if the game is in a new state.
-     * 
-     * @return true if the game is new, false otherwise.
-     */
-    public boolean isNew(){
-        return isNew;
     }
 
     /**
@@ -61,7 +51,12 @@ public class QuoridorGame implements Serializable {
      * @param player The player mode to set. "M" for machine, "H" for human.
      */
     public void setPlayer(String player){
-        vsMachine = "M".equals(player);
+        if (player=="M"){
+            vsMachine=true;
+        }
+        else{
+            vsMachine=false;
+        }
     }
 
     /**
@@ -84,7 +79,7 @@ public class QuoridorGame implements Serializable {
         box BoxInit = (player == 0) ? board.getBox(0, 4) : board.getBox(8, 4);
         int winningRow = (player == 0) ? 8 : 0;
 
-        if (player == 1 || (player == 2 && !vsMachine)) {
+        if (player == 0 || (player == 1 && !vsMachine)) {
             player playerGame = new player(BoxInit, color, name, winningRow);
             players[player] = playerGame;
         } else {
@@ -120,7 +115,7 @@ public class QuoridorGame implements Serializable {
         newPosition[1] = currentBox.getColumn();
         newPosition = obtainNewPosition(direction, newPosition);
     
-        boolean comprobePlayer = comprobePlayer(newPosition[1], newPosition[0]);
+        boolean comprobePlayer = comprobePlayer(newPosition[0], newPosition[1]);
         if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("WE"))) {
             newPosition = obtainNewPosition(direction, newPosition);
         }
@@ -362,7 +357,7 @@ public class QuoridorGame implements Serializable {
         }
         else{
             boolean comprobe = checkDiagonalMovements(direction, newBox);
-            if(comprobe){
+            if(!comprobe){
                 isValid = false;
             }
         }
@@ -406,7 +401,7 @@ public class QuoridorGame implements Serializable {
      * @return true if there is a barrier obstructing the movement, false otherwise.
      */
     private boolean checkDiagonalMovements(String direction, box newBox) {
-        boolean isPossible = true;
+        boolean isPossible = false;
         String enemyPosition = "";
     
         playerTab currentPlayer = players[actualPlayer];
@@ -421,20 +416,11 @@ public class QuoridorGame implements Serializable {
         newPosition1 = obtainNewPosition(String.valueOf(firstDirection), newPosition1);
         newPosition2 = obtainNewPosition(String.valueOf(secondDirection), newPosition2);
     
-        if (!(comprobePlayer(newPosition1[0], newPosition1[1]) || comprobePlayer(newPosition2[0], newPosition2[1]))) {
-            isPossible = false;
-        } else {
-            if (comprobePlayer(newPosition1[0], newPosition1[1])) {
-                enemyPosition = String.valueOf(firstDirection);
-            } else if (comprobePlayer(newPosition2[0], newPosition2[1])) {
-                enemyPosition = String.valueOf(secondDirection);
-            }
-    
-            if (!checkOrthogonalMovements(enemyPosition, newBox)) {
-                isPossible = false;
-            }
+        if (comprobePlayer(newPosition1[0], newPosition1[1]) && checkOrthogonalMovements(String.valueOf(firstDirection), newBox)) {
+            isPossible = true;
+        } else if (comprobePlayer(newPosition2[0], newPosition2[1]) && checkOrthogonalMovements(String.valueOf(secondDirection), newBox)) {
+            isPossible = true;
         }
-        
         return isPossible;
     }
 
@@ -633,7 +619,6 @@ public class QuoridorGame implements Serializable {
                 this.difficult=importedQuoridor.difficult;
                 this.mode=importedQuoridor.mode;
                 this.players=importedQuoridor.players;
-                isNew=false;
             } else {
                 throw new QuoripoobException("El archivo no contiene un jardín válido.");
             }
