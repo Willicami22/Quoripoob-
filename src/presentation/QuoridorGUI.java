@@ -326,32 +326,48 @@ public class QuoridorGUI extends JFrame {
         GridBagConstraints constraints = new GridBagConstraints();
     
         // Panel izquierdo - Información de los jugadores
-        JPanel leftPanel = new JPanel(new BorderLayout());
     
         player2Panel = new JPanel(new FlowLayout());
-        player2Label = new JLabel(name2.getText());
+        player2Label = new JLabel("JUGADOR 2");
         player2Label.setBackground(player2Color);
         player2Panel.add(player2Label);
-        leftPanel.add(player2Panel, BorderLayout.NORTH);
-    
-        QuoridorBoard = new QuoridorBoard(Quoripoob);
-        leftPanel.add(QuoridorBoard, BorderLayout.CENTER); // Agrega el tablero al panel izquierdo
-        
-        player1Panel = new JPanel(new FlowLayout());
-        player1Label = new JLabel(name1.getText());
-        player1Label.setBackground(player1Color);
-        player1Panel.add(player1Label);
-        leftPanel.add(player2Label, BorderLayout.SOUTH);
-    
+
+        //Añadir la información del player 2 al principalGBL
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
-        constraints.gridheight = 3;
-    // El area de texto debe estirarse en ambos sentidos.
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL; 
+        constraints.weightx = 1.0;
+        principalGBL.add (player2Panel, constraints);
+        constraints.weightx = 0.0;
+        
+        //Añadir el tablero al principalGBL
+        QuoridorBoard = new QuoridorBoard(Quoripoob);
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 2;
         constraints.fill = GridBagConstraints.BOTH; 
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
-        principalGBL.add (leftPanel, constraints);
+        principalGBL.add (QuoridorBoard, constraints);
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
+        
+        player1Panel = new JPanel(new FlowLayout());
+        player1Label = new JLabel("JUGADOR 1");
+        player1Label.setBackground(player1Color);
+        player1Panel.add(player1Label);
+        
+        //Añadir la información del player 1 al principalGBL
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL; 
+        constraints.weightx = 1.0;
+        principalGBL.add (player1Panel, constraints);
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;
     
@@ -426,7 +442,6 @@ public class QuoridorGUI extends JFrame {
         constraints.gridy = 1;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
-    // El area de texto debe estirarse en ambos sentidos.
         constraints.fill = GridBagConstraints.BOTH; 
         constraints.weighty = 1.0;
         principalGBL.add (actionOptionsPanel, constraints);
