@@ -45,6 +45,7 @@ public class QuoridorGUI extends JFrame {
     private boolean player1Ready = false;
     private boolean player2Ready = false;
     private Color player1Color,player2Color;
+    private String namePlayer1, namePlayer2;
     
 
     private JPanel choseSpecials;
@@ -53,11 +54,11 @@ public class QuoridorGUI extends JFrame {
     private ArrayList<JTextField> specialTileQuantityFields;
     private JButton submitButton;
  
-
-    private JPanel gameBoardPanel, QuoridorBoard;
-    private JLabel barrierTypeLabel;
-    private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier,save;
-
+    private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
+    private JLabel player1Label, player2Label,barrierTypeLabel;
+    private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier, save;
+    private JTextField rowTextField,columnTextField;
+    private JComboBox<String> directionComboBox;
 
 
     public QuoridorGUI(){
@@ -326,40 +327,56 @@ public class QuoridorGUI extends JFrame {
     
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
+
+        principalGBL = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
     
         // Panel izquierdo - Información de los jugadores
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.setPreferredSize(new Dimension(400, 800)); // Aumenta el ancho y la altura del panel izquierdo
+    
+        player2Panel = new JPanel(new FlowLayout());
+        player2Label = new JLabel("JUGADOR 2");
+        player2Label.setBackground(player2Color);
+        player2Panel.add(player2Label);
+
+        //Añadir la información del player 2 al principalGBL
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL; 
+        constraints.weightx = 1.0;
+        principalGBL.add (player2Panel, constraints);
+        constraints.weightx = 0.0;
         
-        JPanel player2Panel = new JPanel(new BorderLayout());
-        JLabel player2Label = new JLabel("J2:");
-        JLabel player2NameLabel = new JLabel();
-        JLabel player2ColorLabel = new JLabel();
-        player2Panel.add(player2Label, BorderLayout.NORTH);
-        player2Panel.add(player2NameLabel, BorderLayout.CENTER);
-        player2Panel.add(player2ColorLabel, BorderLayout.SOUTH);
-        leftPanel.add(player2Panel, BorderLayout.NORTH);
-    
+        //Añadir el tablero al principalGBL
         QuoridorBoard = new QuoridorBoard(Quoripoob);
-        QuoridorBoard.setPreferredSize(new Dimension(800, 800)); // Ajusta las dimensiones del tablero
-        leftPanel.add(QuoridorBoard,BorderLayout.CENTER); // Agrega el tablero al panel izquierdo
-    
-        JPanel player1Panel = new JPanel(new BorderLayout());
-        JLabel player1Label = new JLabel("J1:");
-        JLabel player1NameLabel = new JLabel();
-        JLabel player1ColorLabel = new JLabel();
-        player1Panel.add(player1Label, BorderLayout.NORTH);
-        player1Panel.add(player1NameLabel, BorderLayout.CENTER);
-        player1Panel.add(player1ColorLabel, BorderLayout.SOUTH);
-        leftPanel.add(player1Panel,BorderLayout.SOUTH);
-    
-        gameBoardPanel.add(leftPanel, BorderLayout.WEST);
-    
-        // Panel derecho - Controles del juego
-        JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setPreferredSize(new Dimension(300, 600));
-    
-        JPanel controlPanel = new JPanel(new GridLayout(2, 1));
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 2;
+        constraints.fill = GridBagConstraints.BOTH; 
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        principalGBL.add (QuoridorBoard, constraints);
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
+        
+        player1Panel = new JPanel(new FlowLayout());
+        player1Label = new JLabel();
+        player1Label.setBackground(player1Color);
+        player1Panel.add(player1Label);
+        
+        //Añadir la información del player 1 al principalGBL
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL; 
+        constraints.weightx = 1.0;
+        principalGBL.add (player1Panel, constraints);
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
+
     
         // Panel de selección de acción (Colocar o Mover)
         JPanel actionPanel = new JPanel();
@@ -375,26 +392,31 @@ public class QuoridorGUI extends JFrame {
         actionPanel.add(moveButton);
         actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
 
-        controlPanel.add(actionPanel);
+        constraints.gridx = 2;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.NONE; 
+        principalGBL.add (actionPanel, constraints);
         
         JPanel actionOptionsPanel = new JPanel(new CardLayout());
     
         // Opciones para colocar barrera
         JPanel placePanel = new JPanel(new GridLayout(5, 2));
         placePanel.add(new JLabel("Orientation:"));
-        JComboBox<String> directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
+        directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
         placePanel.add(directionComboBox);
         placePanel.add(new JLabel("Row:"));
-        JTextField rowTextField = new JTextField();
+        rowTextField = new JTextField();
         placePanel.add(rowTextField);
         placePanel.add(new JLabel("Column:"));
-        JTextField columnTextField = new JTextField();
+        columnTextField = new JTextField();
         placePanel.add(columnTextField);
         placePanel.add(new JLabel("Type:"));
         JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
         placePanel.add(typeComboBox);
-        JButton placeBarrierButton = new JButton("Put Barrier");
-        placePanel.add(placeBarrierButton);
+        putBarrier = new JButton("Put Barrier");
+        placePanel.add(putBarrier);
     
         JPanel movePanel = new JPanel(new GridLayout(3, 3));
 
@@ -423,8 +445,13 @@ public class QuoridorGUI extends JFrame {
         actionOptionsPanel.add(placePanel, "Place");
         actionOptionsPanel.add(movePanel, "Move");
     
-        controlPanel.add(actionOptionsPanel);
-        rightPanel.add(controlPanel, BorderLayout.NORTH);
+        constraints.gridx = 2;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.BOTH; 
+        constraints.weighty = 1.0;
+        principalGBL.add (actionOptionsPanel, constraints);
     
         // Información de barreras
         JPanel barrierInfoPanel = new JPanel(new BorderLayout());
@@ -433,19 +460,31 @@ public class QuoridorGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(barrierTable);
         barrierInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
         barrierInfoPanel.add(scrollPane, BorderLayout.CENTER);
-        rightPanel.add(barrierInfoPanel, BorderLayout.CENTER);
+
+        constraints.gridx = 2;
+        constraints.gridy = 2;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.BOTH; 
+        principalGBL.add (barrierInfoPanel, constraints);
+        constraints.weighty = 0.0;
     
         // Botón de rendirse
         giveUp = new JButton("Give Up");
-        rightPanel.add(giveUp, BorderLayout.SOUTH);
+        constraints.gridx = 2;
+        constraints.gridy = 3;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.BOTH; 
+        principalGBL.add (giveUp, constraints);
     
-        gameBoardPanel.add(rightPanel, BorderLayout.EAST);
+        gameBoardPanel.add(principalGBL, BorderLayout.CENTER);
     
         // Panel inferior - Tiempo y turno
         JPanel bottomPanel = new JPanel(new FlowLayout());
         JLabel turnLabel = new JLabel("Turno:");
         JLabel currentPlayerLabel = new JLabel();
-        JLabel timerLabel = new JLabel("Tiempo: 00:00");
+        JLabel timerLabel = new JLabel();
         bottomPanel.add(turnLabel);
         bottomPanel.add(currentPlayerLabel);
         bottomPanel.add(timerLabel);
@@ -636,7 +675,35 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
+        putBarrier.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                putBarrierAction();
+            }
+        });
+
     }
+
+    private void putBarrierAction() {
+        try {
+            int row = Integer.parseInt(rowTextField.getText());
+            int column = Integer.parseInt(columnTextField.getText());
+            String orientation = (String) directionComboBox.getSelectedItem();
+            
+            if ("Horizontal".equals(orientation)) {
+                Quoripoob.putBarrier(row, column, "H");
+            } else {
+                Quoripoob.putBarrier(row, column, "V");
+            }
+            
+            QuoridorBoard.repaint(); 
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for row and column.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+        } catch (QuoripoobException e) {
+            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+     
+
 
     private void moveAction(String direction){
 
@@ -646,7 +713,8 @@ public class QuoridorGUI extends JFrame {
 
         }  
         catch(QuoripoobException e){
-            
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error" + e.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
+
         }  
     }
 
@@ -689,7 +757,7 @@ private void optionSave() {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Partida guardada correctamente!");
         } catch (QuoripoobException ex) {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            Log.record(ex); // Registra la excepción en el registro de errores
+            Log.record(ex); 
         } catch (SecurityException ex) {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Se ha denegado el acceso al archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             Log.record(ex); // Registra la excepción en el registro de errores
@@ -739,6 +807,9 @@ private void optionSave() {
             String player2Name = name2.getText().trim();
             
             if (!player1Name.isEmpty() && !player2Name.isEmpty() && player1Color != null && player2Color != null) {
+                
+                namePlayer1=name1.getText().trim();
+                namePlayer2=name2.getText().trim();
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
                 
