@@ -51,10 +51,11 @@ public class QuoridorGUI extends JFrame {
     
 
     private JPanel choseSpecials;
-    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField;
+    private JTextField normalBarriersField,temporaryBarriersField,largeBarriersField, alliedBarriersField,totalSpecialTilesField;
     private ArrayList<JCheckBox> specialTileCheckBoxes;
     private ArrayList<JTextField> specialTileQuantityFields;
     private JButton submitButton;
+    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLargeLabel;
  
     private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
     private JLabel player1Label, player2Label,barrierTypeLabel;
@@ -126,9 +127,9 @@ public class QuoridorGUI extends JFrame {
         int row = 0;
     
         addLabeledField(choseSpecials, gbc, row++, "Normal Barriers:", normalBarriersField = new JTextField());
-        addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
-        addLabeledField(choseSpecials, gbc, row++, "Long Barriers:", longBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Allied Barriers:", alliedBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Large Barriers:", largeBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Total Special Tiles:", totalSpecialTilesField = new JTextField());
     
         specialTileCheckBoxes = new ArrayList<>();
@@ -167,6 +168,16 @@ public class QuoridorGUI extends JFrame {
         choseSpecials.add(submitButton, gbc);
     
         principal.add(choseSpecials, "choseSpecials");
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                amountNormalLabel.setText(normalBarriersField.getText());
+                amountAlliedLabel.setText(alliedBarriersField.getText());
+                amountTemporaryLabel.setText(temporaryBarriersField.getText());
+                amountLargeLabel.setText(largeBarriersField.getText());
+            }
+        });
     }
     
     private void addLabeledField(JPanel panel, GridBagConstraints gbc, int row, String labelText, JTextField textField) {
@@ -480,13 +491,13 @@ public class QuoridorGUI extends JFrame {
         JLabel amountALabel = new JLabel("Amount");
 
         JLabel normalALabel = new JLabel("Normal:");
-        JLabel amountNormalLabel = new JLabel("10");
+        amountNormalLabel = new JLabel();
         JLabel alliedLabel = new JLabel("Allied:");
-        JLabel amountAlliedLabel = new JLabel("20");
+        amountAlliedLabel = new JLabel();
         JLabel temporaryLabel = new JLabel("Temporary:");
-        JLabel amountTemporaryLabel = new JLabel("30");
+        amountTemporaryLabel = new JLabel();
         JLabel largeLabel = new JLabel("Large:");
-        JLabel amountLargeLabel = new JLabel("40");
+        amountLargeLabel = new JLabel();
 
         remainingBarriersGrid.add(barrierTypeLabel);
         remainingBarriersGrid.add(amountALabel);
@@ -907,7 +918,7 @@ private void optionSave() {
         try {
             int normalBarriers = Integer.parseInt(normalBarriersField.getText());
             int temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
-            int longBarriers = Integer.parseInt(longBarriersField.getText());
+            int longBarriers = Integer.parseInt(largeBarriersField.getText());
             int alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
             int totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
 
