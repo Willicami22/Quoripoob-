@@ -13,8 +13,9 @@ import javax.swing.JOptionPane;
      * Initializes the game with a board size of 9x9 and sets up initial player positions.
      */
 
-public class QuoridorGame  {
+public class QuoridorGame implements Serializable {
 
+    private static final long serialVersionUID = 1L; 
     private playerTab[] players;
     private board board;
     private int actualPlayer;
@@ -79,19 +80,19 @@ public class QuoridorGame  {
      * @param name The name of the player.
      * @param color The color of the player's pieces.
      */
-    public void setPlayers(int player, String name, Color color){
+    public void setPlayers(int player, String name, Color color) {
         box BoxInit = (player == 0) ? board.getBox(0, 4) : board.getBox(8, 4);
         int winningRow = (player == 0) ? 8 : 0;
-        if(player==1 || (player==2 && !vsMachine)){
-            player playerGame = new player(BoxInit, color, name, winningRow);  
+
+        if (player == 1 || (player == 2 && !vsMachine)) {
+            player playerGame = new player(BoxInit, color, name, winningRow);
             players[player] = playerGame;
-        }
-        else {
+        } else {
             machine playerGame = new machine(BoxInit, color, name, winningRow, difficult);
             players[player] = playerGame;
         }
-    
     }
+    
 
     /**
      * Moves the player's piece in the specified direction.
@@ -328,14 +329,6 @@ public class QuoridorGame  {
     }
 
 
-    public void playIntermediate() throws QuoripoobException{
-        if (!vsMachine) {
-            throw new QuoripoobException("This method can only be called when playing against the machine.");
-        }
-
-        else{}
-
-    }
 
     /**
      * Checks if a barrier placement is valid.
@@ -581,12 +574,13 @@ public class QuoridorGame  {
             outputStream.writeObject(this);
         } catch (FileNotFoundException e) {
             Log.record(e);
-            throw new QuoripoobException("No se puede encontrar el archivo para guardar el Juego: " + e.getMessage());
+            throw new QuoripoobException("No se puede encontrar el archivo para guardar el juego: " + e.getMessage());
         } catch (IOException e) {
             Log.record(e);
             throw new QuoripoobException("Error al guardar la partida: " + e.getMessage());
         }
     }
+    
 
 
     /**
@@ -652,5 +646,176 @@ public class QuoridorGame  {
         } catch (Exception e) {
             throw new QuoripoobException("Error al importar los datos: " + e.getMessage());
         }
+    }
+
+    private int[][] createGraph() {
+        int size = board.getSize();
+        int[][] graph = new int[size * size][size * size];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                int current = i * size + j;
+                box currentBox = board.getBox(i, j);
+                if (!currentBox.hasBarrier("N") && i > 0) {
+                    int neighbor = (i - 1) * size + j;
+                    graph[current][neighbor] = 1;
+                }
+                if (!currentBox.hasBarrier("S") && i < size - 1) {
+                    int neighbor = (i + 1) * size + j;
+                    graph[current][neighbor] = 1;
+                }
+                if (!currentBox.hasBarrier("W") && j > 0) {
+                    int neighbor = i * size + (j - 1);
+                    graph[current][neighbor] = 1;
+                }
+                if (!currentBox.hasBarrier("E") && j < size - 1) {
+                    int neighbor = i * size + (j + 1);
+                    graph[current][neighbor] = 1;
+                }
+            }
+        }
+
+        return graph;
+    }
+
+    private Map<Integer, Integer> dijkstra(int[][] graph, int source) {
+        int size = graph.length;
+        int[] dist = new int[size];
+        int[] prev = new int[size];
+        boolean[] visited = new boolean[size];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(prev, -1);
+        dist[source] = 0;
+
+        for (int i = 0; i < size; i++) {
+            int u = minDistance(dist, visited);
+            if (u == -1) break;
+            visited[u] = true;
+
+            for (int v = 0; v < size; v++) {
+                if (!visited[v] && graph[u][v] != 0 && dist[u] != Integer.MAX_VALUE && dist[u] + graph[u][v] < dist[v]) {
+                    dist[v] = dist[u] + graph[u][v];
+                    prev[v] = u;
+                }
+            }
+        }
+
+        Map<Integer, Integer> path = new HashMap<>();
+        for (int i = 0; i < size; i++) {
+            path.put(i, prev[i]);
+        }
+
+        return path;
+    }
+
+    private int minDistance(int[] dist, boolean[] visited) {
+        int min = Integer.MAX_VALUE, minIndex = -1;
+
+        for (int v = 0; v < dist.length; v++) {
+            if (!visited[v] && dist[v] <= min) {
+                min = dist[v];
+                minIndex = v;
+            }
+        }
+
+        return minIndex;
+    }
+
+    public void playIntermediate() throws QuoripoobException {
+        if (!vsMachine) {
+            throw new QuoripoobException("This method can only be called when playing against the machine.");
+        }
+
+        if (actualPlayer == 1) {
+            playerTab machine = players[1];
+            playerTab human = players[0];
+            int[][] graph = createGraph();
+
+            int machinePosition = machine.getCurrentBox().getRow() * board.getSize() + machine.getCurrentBox().getColumn();
+            int humanPosition = human.getCurrentBox().getRow() * board.getSize() + human.getCurrentBox().getColumn();
+
+            Set<Integer> machineTargets = new HashSet<>();
+            for (int col = 0; col < board.getSize(); col++) {
+                machineTargets.add((board.getSize() - 1) * board.getSize() + col);
+            }
+
+            Set<Integer> humanTargets = new HashSet<>();
+            for (int col = 0; col < board.getSize(); col++) {
+                humanTargets.add(col);
+            }
+
+            Map<Integer, Integer> machinePath = dijkstra(graph, machinePosition);
+            Map<Integer, Integer> humanPath = dijkstra(graph, humanPosition);
+
+            int machineDistance = findShortestPathDistance(machinePath, machinePosition, machineTargets);
+            int humanDistance = findShortestPathDistance(humanPath, humanPosition, humanTargets);
+
+            if (machineDistance < humanDistance) {
+                int nextPosition = findNextPosition(machinePath, machinePosition, machineTargets);
+                int[] newPosition = {nextPosition / board.getSize(), nextPosition % board.getSize()};
+                int[] currentPosition = {machine.getCurrentBox().getRow(), machine.getCurrentBox().getColumn()};
+                String direction = determineDirection(currentPosition, newPosition);
+                moveTab(direction);
+            } else {
+                int row = new Random().nextInt(board.getSize());
+                int col = new Random().nextInt(board.getSize());
+                String orientation = new Random().nextBoolean() ? "H" : "V";
+                try {
+                    putBarrier(row, col, orientation);
+                } catch (QuoripoobException e) {
+                    playIntermediate();
+                }
+            }
+        }
+    }
+
+    private int findShortestPathDistance(Map<Integer, Integer> path, int start, Set<Integer> targets) {
+        int minDistance = Integer.MAX_VALUE;
+        for (int target : targets) {
+            int distance = 0;
+            for (int at = target; at != -1; at = path.get(at)) {
+                distance++;
+                if (at == start) break;
+            }
+            minDistance = Math.min(minDistance, distance);
+        }
+        return minDistance;
+    }
+
+    private int findNextPosition(Map<Integer, Integer> path, int start, Set<Integer> targets) {
+        int minDistance = Integer.MAX_VALUE;
+        int nextPosition = start;
+        for (int target : targets) {
+            int distance = 0;
+            int at;
+            for (at = target; at != -1; at = path.get(at)) {
+                if (path.get(at) == start) {
+                    nextPosition = at;
+                    break;
+                }
+                distance++;
+            }
+            if (distance < minDistance) {
+                minDistance = distance;
+                nextPosition = at;
+            }
+        }
+        return nextPosition;
+    }
+
+    private String determineDirection(int[] currentPosition, int[] newPosition) {
+        int dRow = newPosition[0] - currentPosition[0];
+        int dCol = newPosition[1] - currentPosition[1];
+
+        if (dRow == -1 && dCol == 0) return "N";
+        if (dRow == 1 && dCol == 0) return "S";
+        if (dRow == 0 && dCol == 1) return "E";
+        if (dRow == 0 && dCol == -1) return "W";
+        if (dRow == -1 && dCol == 1) return "NE";
+        if (dRow == -1 && dCol == -1) return "NW";
+        if (dRow == 1 && dCol == 1) return "SE";
+        if (dRow == 1 && dCol == -1) return "SW";
+
+        return null;
     }
 }
