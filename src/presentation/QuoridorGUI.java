@@ -17,6 +17,7 @@ import java.util.*;
 import javax.swing.*;
 
 
+
 public class QuoridorGUI extends JFrame {
     public static final int Widht=800, Height=800;
     private static final Dimension PREFERRED_DIMENSION =
@@ -46,6 +47,7 @@ public class QuoridorGUI extends JFrame {
     private boolean player1Ready = false;
     private boolean player2Ready = false;
     private Color player1Color,player2Color;
+    private String namePlayer1, namePlayer2;
     
 
     private JPanel choseSpecials;
@@ -58,12 +60,13 @@ public class QuoridorGUI extends JFrame {
     private JLabel player1Label, player2Label,barrierTypeLabel;
     private String player1Name, player2Name;
     private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier, save;
-
+    private JTextField rowTextField,columnTextField;
+    private JComboBox<String> directionComboBox;
 
 
     public QuoridorGUI(){
 
-        Quoripoob= new QuoridorGame();
+        Quoripoob=new QuoridorGame();
         prepareElements();
         prepareActions();
     }
@@ -375,6 +378,7 @@ public class QuoridorGUI extends JFrame {
         constraints.weighty = 0.0;
         
         player1Panel = new JPanel(new FlowLayout());
+
         player1Label = new JLabel(player1Name != null ? player1Name : "JUGADOR 1");
         player1Panel.add(player1Label);
         
@@ -388,6 +392,7 @@ public class QuoridorGUI extends JFrame {
         principalGBL.add (player1Panel, constraints);
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;
+
     
         // Panel de selección de acción (Colocar o Mover)
         JPanel actionPanel = new JPanel();
@@ -415,19 +420,19 @@ public class QuoridorGUI extends JFrame {
         // Opciones para colocar barrera
         JPanel placePanel = new JPanel(new GridLayout(5, 2));
         placePanel.add(new JLabel("Orientation:"));
-        JComboBox<String> directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
+        directionComboBox = new JComboBox<>(new String[]{"Horizontal", "Vertical"});
         placePanel.add(directionComboBox);
         placePanel.add(new JLabel("Row:"));
-        JTextField rowTextField = new JTextField();
+        rowTextField = new JTextField();
         placePanel.add(rowTextField);
         placePanel.add(new JLabel("Column:"));
-        JTextField columnTextField = new JTextField();
+        columnTextField = new JTextField();
         placePanel.add(columnTextField);
         placePanel.add(new JLabel("Type:"));
         JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
         placePanel.add(typeComboBox);
-        JButton placeBarrierButton = new JButton("Put Barrier");
-        placePanel.add(placeBarrierButton);
+        putBarrier = new JButton("Put Barrier");
+        placePanel.add(putBarrier);
     
         JPanel movePanel = new JPanel(new GridLayout(3, 3));
 
@@ -558,7 +563,7 @@ public class QuoridorGUI extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout());
         JLabel turnLabel = new JLabel("Turno:");
         JLabel currentPlayerLabel = new JLabel();
-        JLabel timerLabel = new JLabel("Tiempo: 00:00");
+        JLabel timerLabel = new JLabel();
         bottomPanel.add(turnLabel);
         bottomPanel.add(currentPlayerLabel);
         bottomPanel.add(timerLabel);
@@ -701,6 +706,95 @@ public class QuoridorGUI extends JFrame {
             }
         });
 
+        upArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("S");;
+            }
+        });
+
+        downArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("N");;
+            }
+        });
+
+        rightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("W");;
+            }
+        });
+
+        leftArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("E");;
+            }
+        });
+        
+        upLeftArrowBurButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("SW");;
+            }
+        });
+
+        upRightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("SE");
+            }
+        });
+
+        downLeftArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("NW");;
+            }
+        });
+
+        downRightArrowButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                moveAction("NE");
+            }
+        });
+
+        putBarrier.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev){
+                putBarrierAction();
+            }
+        });
+
+    }
+
+    private void putBarrierAction() {
+        try {
+            int row = Integer.parseInt(rowTextField.getText());
+            int column = Integer.parseInt(columnTextField.getText());
+            String orientation = (String) directionComboBox.getSelectedItem();
+            
+            if ("Horizontal".equals(orientation)) {
+                Quoripoob.putBarrier(row, column, "H");
+            } else {
+                Quoripoob.putBarrier(row, column, "V");
+            }
+            
+            QuoridorBoard.repaint(); 
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for row and column.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+        } catch (QuoripoobException e) {
+            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+     
+
+
+    private void moveAction(String direction){
+
+        try{
+            Quoripoob.moveTab(direction);
+            QuoridorBoard.repaint();
+
+        }  
+        catch(QuoripoobException e){
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error" + e.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
+
+        }  
     }
 
     private void newGameAction(){
@@ -742,7 +836,7 @@ private void optionSave() {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Partida guardada correctamente!");
         } catch (QuoripoobException ex) {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            Log.record(ex); // Registra la excepción en el registro de errores
+            Log.record(ex); 
         } catch (SecurityException ex) {
             JOptionPane.showMessageDialog(QuoridorGUI.this, "Se ha denegado el acceso al archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             Log.record(ex); // Registra la excepción en el registro de errores
@@ -792,6 +886,9 @@ private void optionSave() {
             String player2Name = name2.getText().trim();
             
             if (!player1Name.isEmpty() && !player2Name.isEmpty() && player1Color != null && player2Color != null) {
+                
+                namePlayer1=name1.getText().trim();
+                namePlayer2=name2.getText().trim();
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
                 
