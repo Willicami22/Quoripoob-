@@ -181,15 +181,7 @@ public class QuoridorGUI extends JFrame {
                 amountAlliedLabel.setText(alliedBarriersField.getText());
                 amountTemporaryLabel.setText(temporaryBarriersField.getText());
                 amountLongLabel.setText(longBarriersField.getText());
-    
-                // Obtener y mostrar valores de las casillas especiales
-                String teleporterValue = teleporterField.getText();
-                String goBackValue = goBackField.getText();
-                String doubleShiftValue = doubleShiftField.getText();
-    
-                System.out.println("Teleporter: " + teleporterValue);
-                System.out.println("Go Back: " + goBackValue);
-                System.out.println("Double Shift: " + doubleShiftValue);
+
             }
         });
     }
@@ -376,7 +368,7 @@ public class QuoridorGUI extends JFrame {
         // Panel izquierdo - Información de los jugadores
     
         player2Panel = new JPanel(new FlowLayout());
-        player2Label = new JLabel(player2Name != null ? player2Name : "PLAYER 2");
+        player2Label = new JLabel(player2Name != null ? player2Name : "JUGADOR 2");
         player2Panel.add(player2Label);
 
         //Añadir la información del player 2 al principalGBL
@@ -404,7 +396,7 @@ public class QuoridorGUI extends JFrame {
         
         player1Panel = new JPanel(new FlowLayout());
 
-        player1Label = new JLabel(player1Name != null ? player1Name : "PLAYER 1");
+        player1Label = new JLabel(player1Name != null ? player1Name : "JUGADOR 1");
         player1Panel.add(player1Label);
         
         //Añadir la información del player 1 al principalGBL
@@ -424,8 +416,8 @@ public class QuoridorGUI extends JFrame {
         actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.X_AXIS));
         actionPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar en el eje X
 
-        JButton placeButton = new JButton("Put");
-        JButton moveButton = new JButton("Move");
+        JButton placeButton = new JButton("Colocar");
+        JButton moveButton = new JButton("Mover");
 
         actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
         actionPanel.add(placeButton);
@@ -586,7 +578,7 @@ public class QuoridorGUI extends JFrame {
     
         // Panel inferior - Tiempo y turno
         JPanel bottomPanel = new JPanel(new FlowLayout());
-        JLabel turnLabel = new JLabel("Turn:");
+        JLabel turnLabel = new JLabel("Turno:");
         JLabel currentPlayerLabel = new JLabel();
         JLabel timerLabel = new JLabel();
         bottomPanel.add(turnLabel);
@@ -915,10 +907,6 @@ private void optionSave() {
                 namePlayer2=name2.getText().trim();
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
-
-                
-
-                Quoripoob.setBarriers(NORMAL, ERROR, ALLBITS, ABORT);
                 
                 CardLayout cl = (CardLayout) principal.getLayout();
                     cl.show(principal, "choseSpecials");
@@ -955,6 +943,7 @@ private void optionSave() {
             int goBack=Integer.parseInt(goBackField.getText());
             int doubleShift=Integer.parseInt(doubleShiftField.getText());
             int teleporter= Integer.parseInt(teleporterField.getText());
+        
             Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter);
 
             if (sumOfSpecialTiles != totalSpecialTiles) {
