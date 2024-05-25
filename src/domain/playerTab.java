@@ -14,6 +14,8 @@ public class playerTab implements Serializable{
     private Map<String, Integer> barriers;
     protected box position;
     private int winningRow;
+    private ArrayList<String> directions;
+    
 
     /**
      * Constructs a player with the specified initial position, color, name, and winning row.
@@ -30,6 +32,7 @@ public class playerTab implements Serializable{
         this.color = color;
         this.name = name;
         this.winningRow = winningRow;
+        this.directions = new ArrayList<>();
     }
 
     /**
@@ -89,5 +92,17 @@ public class playerTab implements Serializable{
 
     public int getWinningRow(){
         return winningRow;
+    }
+
+    public ArrayList<box> getMovements(){
+        return movements;
+    }
+
+    public ArrayList<String> getDirections(){
+        return directions;
+    }
+
+    public void setDirections(String direction){
+        directions.add(direction);
     }
 }
