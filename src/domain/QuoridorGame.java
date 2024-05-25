@@ -87,6 +87,12 @@ public class QuoridorGame implements Serializable {
             players[player] = playerGame;
         }
     }
+
+    public void setBarriers(int normalBarriers,int alliedBarriers,int temporaryBarriers, int largeBarriers){
+        for(playerTab p: players){
+            p.startBarriers(normalBarriers,alliedBarriers,temporaryBarriers,largeBarriers);
+        }
+    }
     
 
     /**
@@ -132,6 +138,7 @@ public class QuoridorGame implements Serializable {
     
         currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
         currentPlayer.setDirections(direction);
+        board.comprobeBarrier();
         comprobeWinner();
     
         if (board.getBox(newPosition[0], newPosition[1]) instanceof goBack) {
@@ -161,6 +168,7 @@ public class QuoridorGame implements Serializable {
                 playMachine();
             }
         }
+        
     }
     
 
@@ -243,75 +251,85 @@ public class QuoridorGame implements Serializable {
      * @throws QuoripoobException If the barrier placement is invalid.
      */
     public void putBarrier(int rowInit, int columnInit, String orientation,String type) throws QuoripoobException { 
-    if (!isValidBarrierPlacement(rowInit, columnInit, orientation,type)) {
-        throw new QuoripoobException("Invalid barrier placement");
 
-    }
-    barrier barrier;
-    if (type=="Long"){
-        barrier= new Long();
-    }
-    else if(type=="Allied"){
-        barrier= new allied( getActualPlayer());
-    }
+    if(getActualPlayer().getNumberBarrier(type)>0 ){
 
-    else if(type=="Temporary"){
-        barrier= new temporary( );
+        if (!isValidBarrierPlacement(rowInit, columnInit, orientation,type)) {
+            throw new QuoripoobException("Invalid barrier placement");
+
+        }
+        barrier barrier;
+        if (type=="Large"){
+            barrier= new large(true);
+        }
+        else if(type=="Allied"){
+            barrier= new allied( getActualPlayer());
+        }
+
+        else if(type=="Temporary"){
+            barrier= new temporary(getActualPlayer(),true);
+        }
+        else{
+            barrier = new barrier(true);
+        }
+
+        if (orientation.equals("H")) {
+            board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
+            board.getBox(rowInit, columnInit + 1).placeBarrier(barrier, "N");
+            board.getBox(rowInit - 1, columnInit).placeBarrier(barrier, "S");
+            board.getBox(rowInit - 1, columnInit + 1).placeBarrier(barrier, "S");
+            if(barrier instanceof large){
+                board.getBox(rowInit, columnInit + 2).placeBarrier(barrier, "N");
+                board.getBox(rowInit - 1, columnInit+2).placeBarrier(barrier, "S");
+            }
+
+        } else if (orientation.equals("V")) {
+            board.getBox(rowInit, columnInit).placeBarrier(barrier, "W");
+            board.getBox(rowInit + 1, columnInit).placeBarrier(barrier, "W");
+            board.getBox(rowInit, columnInit - 1).placeBarrier(barrier, "E");
+            board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
+            if(barrier instanceof large){
+                board.getBox(rowInit+2, columnInit -1).placeBarrier(barrier, "E");
+                board.getBox(rowInit+2, columnInit-1).placeBarrier(barrier, "W");
+            }
+        } else {
+            throw new QuoripoobException("Invalid orientation");
+        }
+
+        if (!canPlayerWin()) {
+            if (orientation.equals("H")) {
+                board.getBox(rowInit, columnInit).eraseBarrier("N");
+                board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
+                board.getBox(rowInit - 1, columnInit).eraseBarrier("S");
+                board.getBox(rowInit - 1, columnInit + 1).eraseBarrier("S");
+                if(barrier instanceof large){
+                    board.getBox(rowInit, columnInit + 2).eraseBarrier( "N");
+                    board.getBox(rowInit - 1, columnInit+2).eraseBarrier( "S");
+                }
+            } else {
+                board.getBox(rowInit, columnInit).eraseBarrier("W");
+                board.getBox(rowInit + 1, columnInit).eraseBarrier("W");
+                board.getBox(rowInit, columnInit - 1).eraseBarrier("E");
+                board.getBox(rowInit + 1, columnInit - 1).eraseBarrier("E");
+                if(barrier instanceof large){
+                    board.getBox(rowInit+2, columnInit -1).eraseBarrier( "E");
+                    board.getBox(rowInit+2, columnInit-1).eraseBarrier( "W");
+                }
+            }
+            throw new QuoripoobException("El camino bloquea al jugador");
+        }
+
+        board.comprobeBarrier();
+        getActualPlayer().updateBarrier(type);
+        actualPlayer = (actualPlayer + 1) % players.length;
+    
+
+        if (vsMachine) {
+            playMachine();
+        }
     }
     else{
-        barrier = new barrier();
-    }
-
-    if (orientation.equals("H")) {
-        board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
-        board.getBox(rowInit, columnInit + 1).placeBarrier(barrier, "N");
-        board.getBox(rowInit - 1, columnInit).placeBarrier(barrier, "S");
-        board.getBox(rowInit - 1, columnInit + 1).placeBarrier(barrier, "S");
-        if (barrier instanceof Long){
-            board.getBox(rowInit-1, columnInit + 2).placeBarrier(barrier, "S");
-            board.getBox(rowInit , columnInit + 2).placeBarrier(barrier, "N");
-        }
-    } else if (orientation.equals("V")) {
-        board.getBox(rowInit, columnInit).placeBarrier(barrier, "W");
-        board.getBox(rowInit + 1, columnInit).placeBarrier(barrier, "W");
-        board.getBox(rowInit, columnInit - 1).placeBarrier(barrier, "E");
-        board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
-        if (barrier instanceof Long){
-            board.getBox(rowInit+2, columnInit ).placeBarrier(barrier, "W");
-            board.getBox(rowInit+2 , columnInit -1).placeBarrier(barrier, "E");
-        }
-    } else {
-        throw new QuoripoobException("Invalid orientation");
-    }
-
-    if (!canPlayerWin()) {
-        if (orientation.equals("H")) {
-            board.getBox(rowInit, columnInit).eraseBarrier("N");
-            board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
-            board.getBox(rowInit - 1, columnInit).eraseBarrier("S");
-            board.getBox(rowInit - 1, columnInit + 1).eraseBarrier("S");
-            if (barrier instanceof Long){
-                board.getBox(rowInit-1, columnInit + 2).eraseBarrier( "S");
-                board.getBox(rowInit , columnInit + 2).eraseBarrier( "N");
-            
-        } else {
-            board.getBox(rowInit, columnInit).eraseBarrier("W");
-            board.getBox(rowInit + 1, columnInit).eraseBarrier("W");
-            board.getBox(rowInit, columnInit - 1).eraseBarrier("E");
-            board.getBox(rowInit + 1, columnInit - 1).eraseBarrier("E");
-            if (barrier instanceof Long){
-                board.getBox(rowInit+2, columnInit ).eraseBarrier("W");
-                board.getBox(rowInit+2 , columnInit -1).eraseBarrier( "E");
-        }
-        throw new QuoripoobException("El camino bloquea al jugador");
-    }
-}
-    }     
-
-    actualPlayer = (actualPlayer + 1) % players.length;
-
-    if (vsMachine) {
-        playMachine();
+        throw new QuoripoobException("You dont have more than this barriers");
     }
 }
 
@@ -333,7 +351,7 @@ public class QuoridorGame implements Serializable {
         }
     
         // Verificar restricciones específicas para la orientación de la barrera
-        if (orientation.equals("H") && type!="Long") {
+        if (orientation.equals("H") && type!="Large") {
             // Si la orientación es horizontal, verificar los límites de columna
             if (columnInit == boardSize - 1 || columnInit == boardSize) {
                 return false; // Fuera de los límites
@@ -343,10 +361,10 @@ public class QuoridorGame implements Serializable {
             if (rowInit == boardSize - 1 || rowInit == boardSize) {
                 return false; // Fuera de los límites
             }
-        } else if (orientation.equals("V")  && type=="Long") {
+        } else if (orientation.equals("V")  && type=="Large") {
             if (rowInit == boardSize - 1 || rowInit == boardSize || rowInit == boardSize-2)
                 return false;
-        }else if (orientation.equals("H")  && type=="Long") {
+        }else if (orientation.equals("H")  && type=="Large") {
             if (columnInit == boardSize - 1 || columnInit == boardSize || columnInit == boardSize-2)
                 return false;
         }else {
@@ -355,19 +373,19 @@ public class QuoridorGame implements Serializable {
         }
     
         // Verificar si hay barreras en las posiciones adyacentes
-        if (orientation.equals("H") && type!="Long") {
+        if (orientation.equals("H") && type!="Large") {
             return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
                    !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
                    !board.getBox(rowInit , columnInit).hasBarrier("N") &&
                    !board.getBox(rowInit , columnInit + 1).hasBarrier("N");
             
-        } else if (orientation.equals("V") && type!="Long") {
+        } else if (orientation.equals("V") && type!="Large") {
             return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
                    !board.getBox(rowInit, columnInit).hasBarrier("W") &&
                    !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
                    !board.getBox(rowInit + 1, columnInit).hasBarrier("W");
         }
-        if (orientation.equals("H") && type=="Long") {
+        if (orientation.equals("H") && type=="Large") {
             return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
                    !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
                    !board.getBox(rowInit , columnInit).hasBarrier("N") &&
@@ -376,7 +394,7 @@ public class QuoridorGame implements Serializable {
                    !board.getBox(rowInit , columnInit + 2).hasBarrier("N");
                    
             
-        } else if (orientation.equals("V") && type=="Long") {
+        } else if (orientation.equals("V") && type=="Large") {
             return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
                    !board.getBox(rowInit, columnInit).hasBarrier("W") &&
                    !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
@@ -510,15 +528,42 @@ public class QuoridorGame implements Serializable {
         boolean comprobe = false;
         if(direction.equals("S")){
             comprobe = newBox.thereIsABarrier("S");
+            if (comprobe && newBox.getBarrier("S") instanceof allied){
+                allied barrier = (allied) newBox.getBarrier("S");
+                if(barrier.getOwner()==getActualPlayer()){
+                    comprobe=false;
+                }
+            };
         }
         else if(direction.equals("N")){
             comprobe = newBox.thereIsABarrier("N");
+            comprobe = newBox.thereIsABarrier("N");
+            if (comprobe && newBox.getBarrier("N") instanceof allied){
+                allied barrier = (allied) newBox.getBarrier("N");
+                if(barrier.getOwner()==getActualPlayer()){
+                    comprobe=false;
+                }
+            };
         }
         else if(direction.equals("E")){
             comprobe = newBox.thereIsABarrier("E");
+            comprobe = newBox.thereIsABarrier("E");
+            if (comprobe && newBox.getBarrier("E") instanceof allied){
+                allied barrier = (allied) newBox.getBarrier("E");
+                if(barrier.getOwner()==getActualPlayer()){
+                    comprobe=false;
+                }
+            };
         }
         else{
             comprobe = newBox.thereIsABarrier("W");
+            comprobe = newBox.thereIsABarrier("W");
+            if (comprobe && newBox.getBarrier("W") instanceof allied){
+                allied barrier = (allied) newBox.getBarrier("W");
+                if(barrier.getOwner()==getActualPlayer()){
+                    comprobe=false;
+                }
+            };
         }
         return comprobe;
     }
@@ -936,5 +981,27 @@ public class QuoridorGame implements Serializable {
         if (dRow == 1 && dCol == -1) return "SW";
 
         return null;
+    }
+
+    public void distributeSpecialBoxes( int cantGoBack, int cantDoubleShift, int cantTeleporter) {
+        Random random = new Random();
+    
+        for (int i = 0; i < cantGoBack; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new goBack(fila, columna));
+        }
+    
+        for (int i = 0; i < cantDoubleShift; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new doubleShift(fila, columna));
+        }
+    
+        for (int i = 0; i < cantTeleporter; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new teleporter(fila, columna));
+        }
     }
 }

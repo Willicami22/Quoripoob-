@@ -51,11 +51,14 @@ public class QuoridorGUI extends JFrame {
     
 
     private JPanel choseSpecials;
-    private JTextField normalBarriersField,temporaryBarriersField,largeBarriersField, alliedBarriersField,totalSpecialTilesField;
+    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField;
     private ArrayList<JCheckBox> specialTileCheckBoxes;
     private ArrayList<JTextField> specialTileQuantityFields;
     private JButton submitButton;
-    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLargeLabel;
+    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLongLabel;
+    private JTextField teleporterField;
+    private JTextField goBackField;
+    private JTextField doubleShiftField;
  
     private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
     private JLabel player1Label, player2Label,barrierTypeLabel;
@@ -129,16 +132,18 @@ public class QuoridorGUI extends JFrame {
         addLabeledField(choseSpecials, gbc, row++, "Normal Barriers:", normalBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Allied Barriers:", alliedBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
-        addLabeledField(choseSpecials, gbc, row++, "Large Barriers:", largeBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Large Barriers:", longBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Total Special Tiles:", totalSpecialTilesField = new JTextField());
     
         specialTileCheckBoxes = new ArrayList<>();
         specialTileQuantityFields = new ArrayList<>();
     
         String[] tileTypes = {"Teleporter", "Go Back", "Double Shift"};
-        for (String tileType : tileTypes) {
-            JCheckBox checkBox = new JCheckBox(tileType);
-            JTextField quantityField = new JTextField();
+        JTextField[] fields = {teleporterField = new JTextField(), goBackField = new JTextField(), doubleShiftField = new JTextField()};
+    
+        for (int i = 0; i < tileTypes.length; i++) {
+            JCheckBox checkBox = new JCheckBox(tileTypes[i]);
+            JTextField quantityField = fields[i];
             quantityField.setEnabled(false);
     
             checkBox.addActionListener(new ActionListener() {
@@ -168,14 +173,23 @@ public class QuoridorGUI extends JFrame {
         choseSpecials.add(submitButton, gbc);
     
         principal.add(choseSpecials, "choseSpecials");
-
+    
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 amountNormalLabel.setText(normalBarriersField.getText());
                 amountAlliedLabel.setText(alliedBarriersField.getText());
                 amountTemporaryLabel.setText(temporaryBarriersField.getText());
-                amountLargeLabel.setText(largeBarriersField.getText());
+                amountLongLabel.setText(longBarriersField.getText());
+    
+                // Obtener y mostrar valores de las casillas especiales
+                String teleporterValue = teleporterField.getText();
+                String goBackValue = goBackField.getText();
+                String doubleShiftValue = doubleShiftField.getText();
+    
+                System.out.println("Teleporter: " + teleporterValue);
+                System.out.println("Go Back: " + goBackValue);
+                System.out.println("Double Shift: " + doubleShiftValue);
             }
         });
     }
@@ -496,8 +510,8 @@ public class QuoridorGUI extends JFrame {
         amountAlliedLabel = new JLabel();
         JLabel temporaryLabel = new JLabel("Temporary:");
         amountTemporaryLabel = new JLabel();
-        JLabel largeLabel = new JLabel("Large:");
-        amountLargeLabel = new JLabel();
+        JLabel longLabel = new JLabel("Large:");
+        amountLongLabel = new JLabel();
 
         remainingBarriersGrid.add(barrierTypeLabel);
         remainingBarriersGrid.add(amountALabel);
@@ -507,8 +521,8 @@ public class QuoridorGUI extends JFrame {
         remainingBarriersGrid.add(amountAlliedLabel);
         remainingBarriersGrid.add(temporaryLabel);
         remainingBarriersGrid.add(amountTemporaryLabel);
-        remainingBarriersGrid.add(largeLabel);
-        remainingBarriersGrid.add(amountLargeLabel);
+        remainingBarriersGrid.add(longLabel);
+        remainingBarriersGrid.add(amountLongLabel);
         
 
         barriersInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
@@ -901,6 +915,10 @@ private void optionSave() {
                 namePlayer2=name2.getText().trim();
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
+
+                
+
+                Quoripoob.setBarriers(NORMAL, ERROR, ALLBITS, ABORT);
                 
                 CardLayout cl = (CardLayout) principal.getLayout();
                     cl.show(principal, "choseSpecials");
@@ -917,7 +935,7 @@ private void optionSave() {
         try {
             int normalBarriers = Integer.parseInt(normalBarriersField.getText());
             int temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
-            int longBarriers = Integer.parseInt(largeBarriersField.getText());
+            int longBarriers = Integer.parseInt(longBarriersField.getText());
             int alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
             int totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
 
@@ -931,6 +949,13 @@ private void optionSave() {
                     String type = checkBox.getText();
                 }
             }
+
+            Quoripoob.setBarriers(normalBarriers, alliedBarriers, temporaryBarriers, longBarriers);
+
+            int goBack=Integer.parseInt(goBackField.getText());
+            int doubleShift=Integer.parseInt(doubleShiftField.getText());
+            int teleporter= Integer.parseInt(teleporterField.getText());
+            Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter);
 
             if (sumOfSpecialTiles != totalSpecialTiles) {
                 JOptionPane.showMessageDialog(this, "The total quantity of special tiles does not match the specified total.");
@@ -1005,6 +1030,8 @@ private void optionSave() {
         gameBoardPanel.revalidate();
         gameBoardPanel.repaint();
     }
+
+    
     
     public static void main(String args[]){
         QuoridorGUI home=new QuoridorGUI();

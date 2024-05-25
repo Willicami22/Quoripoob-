@@ -54,4 +54,18 @@ public class board implements Serializable {
     public box[][] getBoxes(){
         return boxes;
     }
+
+    public void setSpecialBox(box box){
+        boxes[box.getRow()][box.getColumn()]=box;
+    }
+
+    public void comprobeBarrier(){
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                box box=boxes[i][j];
+                box.comprobeBarrier();
+            }        
+        }
+
+    }
 }

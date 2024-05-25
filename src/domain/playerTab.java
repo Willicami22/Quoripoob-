@@ -3,6 +3,7 @@ package domain;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class playerTab implements Serializable{
@@ -33,17 +34,21 @@ public class playerTab implements Serializable{
         this.name = name;
         this.winningRow = winningRow;
         this.directions = new ArrayList<>();
+        barriers = new HashMap<>();
+
+        barriers.put("Allied", 0);
+        barriers.put("Temporary", 0);
+        barriers.put("Normal", 0);
+        barriers.put("Large", 0);
+        
     }
 
-    /**
-     * Sets the barriers for the player.
-     * 
-     * @param barriers The map containing the barriers.
-     */
-    public void setBarriers(Map<String, Integer> barriers){
-        this.barriers = barriers;
+    public void startBarriers(int normal, int allied,int temporary, int large){
+        barriers.put("Allied", allied);
+        barriers.put("Temporary", temporary);
+        barriers.put("Normal", normal);
+        barriers.put("Large", large);
     }
-
     /**
      * Gets the current box position of the player.
      * 
@@ -117,5 +122,30 @@ public class playerTab implements Serializable{
             directions.remove(directions.size() - 1);
             }
         }
+
+    public void updateBarrierTemporaly(){
+        Integer currentValue = barriers.get("Temporary");
+    
+        // Incrementar el valor en uno
+        int updatedValue = currentValue + 1;
+        
+        // Actualizar el valor en el mapa
+        barriers.put("Temporary", updatedValue);
     }
+
+    public int getNumberBarrier(String type){
+        return barriers.get(type);
+    }
+
+    public void updateBarrier(String type){
+        Integer currentValue = barriers.get(type);
+    
+        // Incrementar el valor en uno
+        int updatedValue = currentValue - 1;
+        
+        // Actualizar el valor en el mapa
+        barriers.put(type, updatedValue);
+    }
+    
+}
 

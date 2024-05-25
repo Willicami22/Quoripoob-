@@ -61,15 +61,19 @@ public class QuoridorBoard extends JPanel {
                 g.setColor(Color.YELLOW);
 
                 if (currentBox.hasBarrier("N")) {
+                    g.setColor(currentBox.getBarrier("N").getColor());
                     g.fillRect(x, y - boxSize / 10, boxSize, boxSize / 5);
                 }
                 if (currentBox.hasBarrier("S")) {
+                    g.setColor(currentBox.getBarrier("S").getColor());
                     g.fillRect(x, y + boxSize - boxSize / 10, boxSize, boxSize / 5);
                 }
                 if (currentBox.hasBarrier("E")) {
+                    g.setColor(currentBox.getBarrier("E").getColor());
                     g.fillRect(x + boxSize - boxSize / 10, y, boxSize / 5, boxSize);
                 }
                 if (currentBox.hasBarrier("W")) {
+                    g.setColor(currentBox.getBarrier("W").getColor());
                     g.fillRect(x - boxSize / 10, y, boxSize / 5, boxSize);
                 }
             }

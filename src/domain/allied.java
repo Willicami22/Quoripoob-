@@ -6,8 +6,13 @@ public class allied extends barrier {
 
     public allied( playerTab owner){
 
-        super();
+        super(true);
         this.owner=owner;
+        color=colorsPalette.VIBRANT_GREEN;
+    }
+
+    public playerTab getOwner(){
+        return owner;
     }
 
 }

@@ -17,8 +17,8 @@ public class barrier implements Serializable{
      * 
      * @param orientation The orientation of the barrier.
      */
-    public barrier(){
-        color = Color.YELLOW;
+    public barrier(boolean si){
+        color = colorsPalette.VIBRANT_YELLOW;
     }
 
     public Color getColor(){

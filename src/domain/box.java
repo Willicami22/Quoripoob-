@@ -92,6 +92,44 @@ public class box implements Serializable {
     public Color getColor(){
         return color;
     }
- }
+
+    public void comprobeBarrier() {
+        // Comprobar si hay una barrera temporal en la dirección "N"
+        if (barriers.containsKey("N") && barriers.get("N") instanceof temporary) {
+            temporary barrierN = (temporary) barriers.get("N");
+            if (barrierN.comprobeBarrier()) {
+                barriers.put("N", null);
+            }
+        }
+    
+        // Comprobar si hay una barrera temporal en la dirección "E"
+        if (barriers.containsKey("E") && barriers.get("E") instanceof temporary) {
+            temporary barrierE = (temporary) barriers.get("E");
+            if (barrierE.comprobeBarrier()) {
+                barriers.put("E", null);
+            }
+        }
+    
+        // Comprobar si hay una barrera temporal en la dirección "S"
+        if (barriers.containsKey("S") && barriers.get("S") instanceof temporary) {
+            temporary barrierS = (temporary) barriers.get("S");
+            if (barrierS.comprobeBarrier()) {
+                barriers.put("S", null);
+            }
+        }
+    
+        // Comprobar si hay una barrera temporal en la dirección "W"
+        if (barriers.containsKey("W") && barriers.get("W") instanceof temporary) {
+            temporary barrierW = (temporary) barriers.get("W");
+            if (barrierW.comprobeBarrier()) {
+                barriers.put("W", null);
+            }
+        }
+    }
+    
+    public barrier getBarrier(String direction){
+        return barriers.get(direction);
+    }
+}
 
 
