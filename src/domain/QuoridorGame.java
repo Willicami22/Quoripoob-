@@ -242,41 +242,71 @@ public class QuoridorGame implements Serializable {
      * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
      * @throws QuoripoobException If the barrier placement is invalid.
      */
-    public void putBarrier(int rowInit, int columnInit, String orientation) throws QuoripoobException {
-    if (!isValidBarrierPlacement(rowInit, columnInit, orientation)) {
+    public void putBarrier(int rowInit, int columnInit, String orientation,String type) throws QuoripoobException { 
+    if (!isValidBarrierPlacement(rowInit, columnInit, orientation,type)) {
         throw new QuoripoobException("Invalid barrier placement");
+
     }
-    barrier barrier = new barrier(orientation.equals("H"));
+    barrier barrier;
+    if (type=="Long"){
+        barrier= new Long();
+    }
+    else if(type=="Allied"){
+        barrier= new allied( getActualPlayer());
+    }
+
+    else if(type=="Temporary"){
+        barrier= new temporary( );
+    }
+    else{
+        barrier = new barrier();
+    }
 
     if (orientation.equals("H")) {
         board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
         board.getBox(rowInit, columnInit + 1).placeBarrier(barrier, "N");
         board.getBox(rowInit - 1, columnInit).placeBarrier(barrier, "S");
         board.getBox(rowInit - 1, columnInit + 1).placeBarrier(barrier, "S");
+        if (barrier instanceof Long){
+            board.getBox(rowInit-1, columnInit + 2).placeBarrier(barrier, "S");
+            board.getBox(rowInit , columnInit + 2).placeBarrier(barrier, "N");
+        }
     } else if (orientation.equals("V")) {
         board.getBox(rowInit, columnInit).placeBarrier(barrier, "W");
         board.getBox(rowInit + 1, columnInit).placeBarrier(barrier, "W");
         board.getBox(rowInit, columnInit - 1).placeBarrier(barrier, "E");
         board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
+        if (barrier instanceof Long){
+            board.getBox(rowInit+2, columnInit ).placeBarrier(barrier, "W");
+            board.getBox(rowInit+2 , columnInit -1).placeBarrier(barrier, "E");
+        }
     } else {
         throw new QuoripoobException("Invalid orientation");
     }
 
     if (!canPlayerWin()) {
-        // Remove barriers if they block the path
         if (orientation.equals("H")) {
             board.getBox(rowInit, columnInit).eraseBarrier("N");
             board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
             board.getBox(rowInit - 1, columnInit).eraseBarrier("S");
             board.getBox(rowInit - 1, columnInit + 1).eraseBarrier("S");
+            if (barrier instanceof Long){
+                board.getBox(rowInit-1, columnInit + 2).eraseBarrier( "S");
+                board.getBox(rowInit , columnInit + 2).eraseBarrier( "N");
+            
         } else {
             board.getBox(rowInit, columnInit).eraseBarrier("W");
             board.getBox(rowInit + 1, columnInit).eraseBarrier("W");
             board.getBox(rowInit, columnInit - 1).eraseBarrier("E");
             board.getBox(rowInit + 1, columnInit - 1).eraseBarrier("E");
+            if (barrier instanceof Long){
+                board.getBox(rowInit+2, columnInit ).eraseBarrier("W");
+                board.getBox(rowInit+2 , columnInit -1).eraseBarrier( "E");
         }
         throw new QuoripoobException("El camino bloquea al jugador");
     }
+}
+    }     
 
     actualPlayer = (actualPlayer + 1) % players.length;
 
@@ -294,7 +324,7 @@ public class QuoridorGame implements Serializable {
      * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
      * @return true if the barrier placement is valid, false otherwise.
      */
-    private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation) {
+    private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation,String type) {
         int boardSize = board.getSize();
     
         // Verificar si las coordenadas están dentro de los límites del tablero
@@ -303,7 +333,7 @@ public class QuoridorGame implements Serializable {
         }
     
         // Verificar restricciones específicas para la orientación de la barrera
-        if (orientation.equals("H")) {
+        if (orientation.equals("H") && type!="Long") {
             // Si la orientación es horizontal, verificar los límites de columna
             if (columnInit == boardSize - 1 || columnInit == boardSize) {
                 return false; // Fuera de los límites
@@ -313,22 +343,50 @@ public class QuoridorGame implements Serializable {
             if (rowInit == boardSize - 1 || rowInit == boardSize) {
                 return false; // Fuera de los límites
             }
-        } else {
+        } else if (orientation.equals("V")  && type=="Long") {
+            if (rowInit == boardSize - 1 || rowInit == boardSize || rowInit == boardSize-2)
+                return false;
+        }else if (orientation.equals("H")  && type=="Long") {
+            if (columnInit == boardSize - 1 || columnInit == boardSize || columnInit == boardSize-2)
+                return false;
+        }else {
             // Orientación inválida
             return false;
         }
     
         // Verificar si hay barreras en las posiciones adyacentes
-        if (orientation.equals("H")) {
+        if (orientation.equals("H") && type!="Long") {
             return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
                    !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
                    !board.getBox(rowInit , columnInit).hasBarrier("N") &&
                    !board.getBox(rowInit , columnInit + 1).hasBarrier("N");
-        } else {
+            
+        } else if (orientation.equals("V") && type!="Long") {
             return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
                    !board.getBox(rowInit, columnInit).hasBarrier("W") &&
                    !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
                    !board.getBox(rowInit + 1, columnInit).hasBarrier("W");
+        }
+        if (orientation.equals("H") && type=="Long") {
+            return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
+                   !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
+                   !board.getBox(rowInit , columnInit).hasBarrier("N") &&
+                   !board.getBox(rowInit , columnInit + 1).hasBarrier("N") &&
+                   !board.getBox(rowInit-1 , columnInit+2).hasBarrier("N") &&
+                   !board.getBox(rowInit , columnInit + 2).hasBarrier("N");
+                   
+            
+        } else if (orientation.equals("V") && type=="Long") {
+            return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
+                   !board.getBox(rowInit, columnInit).hasBarrier("W") &&
+                   !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
+                   !board.getBox(rowInit + 1, columnInit).hasBarrier("W") &&
+                   !board.getBox(rowInit + 2, columnInit - 1).hasBarrier("E") &&
+                   !board.getBox(rowInit + 2, columnInit).hasBarrier("W") ;
+        }
+
+        else{
+            return false;
         }
     }
     
@@ -337,7 +395,7 @@ public class QuoridorGame implements Serializable {
      * Plays the machine's turn based on the selected difficulty level.
      */
     public void playMachine() throws QuoripoobException{
-        if(difficult.equals("begginer")){
+        if(difficult.equals("B")){
             
             playBeginner();
 
@@ -385,7 +443,7 @@ public class QuoridorGame implements Serializable {
                 int col = random.nextInt(board.getSize());
                 String orientation = random.nextBoolean() ? "H" : "V";
                 try {
-                    putBarrier(row, col, orientation);
+                    putBarrier(row, col, orientation,"Normal");
                 } catch (QuoripoobException e) {
                     
                     Log.record(e);
@@ -822,7 +880,7 @@ public class QuoridorGame implements Serializable {
                 int col = new Random().nextInt(board.getSize());
                 String orientation = new Random().nextBoolean() ? "H" : "V";
                 try {
-                    putBarrier(row, col, orientation);
+                    putBarrier(row, col, orientation,"Normal");
                 } catch (QuoripoobException e) {
                     playIntermediate();
                 }

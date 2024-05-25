@@ -62,7 +62,7 @@ public class QuoridorGUI extends JFrame {
     private String player1Name, player2Name;
     private JButton upLeftArrowBurButton,upArrowButton ,upRightArrowButton ,leftArrowButton ,rightArrowButton ,downLeftArrowButton ,downArrowButton ,downRightArrowButton ,giveUp,putBarrier, save;
     private JTextField rowTextField,columnTextField;
-    private JComboBox<String> directionComboBox;
+    private JComboBox<String> directionComboBox,typeComboBox;
 
 
     public QuoridorGUI(){
@@ -440,7 +440,7 @@ public class QuoridorGUI extends JFrame {
         columnTextField = new JTextField();
         placePanel.add(columnTextField);
         placePanel.add(new JLabel("Type:"));
-        JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
+        typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
         placePanel.add(typeComboBox);
         putBarrier = new JButton("Put Barrier");
         placePanel.add(putBarrier);
@@ -778,11 +778,13 @@ public class QuoridorGUI extends JFrame {
             int row = Integer.parseInt(rowTextField.getText());
             int column = Integer.parseInt(columnTextField.getText());
             String orientation = (String) directionComboBox.getSelectedItem();
+            String type=(String) typeComboBox.getSelectedItem();
             
+
             if ("Horizontal".equals(orientation)) {
-                Quoripoob.putBarrier(row, column, "H");
+                Quoripoob.putBarrier(row, column, "H",type);
             } else {
-                Quoripoob.putBarrier(row, column, "V");
+                Quoripoob.putBarrier(row, column, "V",type);
             }
             
             QuoridorBoard.repaint(); 

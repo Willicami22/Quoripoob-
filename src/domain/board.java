@@ -24,9 +24,7 @@ public class board implements Serializable {
                 boxes[i][j] = new box(i, j);
             }        
         }
-        boxes[1][4]=new doubleShift(1, 4);
-        boxes[1][5]=new teleporter(1, 5);
-        boxes[1][3]=new goBack(1, 3);
+
     }
 
     /**

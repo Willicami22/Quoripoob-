@@ -1,5 +1,6 @@
 package domain;
 
+import java.awt.Color;
 import java.io.Serializable;
 
 /**
@@ -8,8 +9,7 @@ import java.io.Serializable;
 public class barrier implements Serializable{
 
     private static final long serialVersionUID = 1L; 
-    protected String color;
-    private boolean orientation;
+    protected Color color;
     
 
     /**
@@ -17,9 +17,12 @@ public class barrier implements Serializable{
      * 
      * @param orientation The orientation of the barrier.
      */
-    public barrier(boolean orientation){
-        color = "black";
-        this.orientation = orientation;
+    public barrier(){
+        color = Color.YELLOW;
+    }
+
+    public Color getColor(){
+        return color;
     }
 }
 

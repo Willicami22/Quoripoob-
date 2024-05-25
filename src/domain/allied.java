@@ -4,9 +4,9 @@ public class allied extends barrier {
 
     private playerTab owner;
 
-    public allied(boolean orientation, playerTab owner){
+    public allied( playerTab owner){
 
-        super(orientation);
+        super();
         this.owner=owner;
     }
 
