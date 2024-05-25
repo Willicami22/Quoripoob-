@@ -139,7 +139,21 @@ public class QuoridorGame implements Serializable {
 
     
         currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
+        currentPlayer.setDirections(direction);
         comprobeWinner();
+
+        if (currentBox instanceof goBack){
+            ArrayList<box> movements = currentPlayer.getMovements();
+            box lastBox = movements.get(movements.size()-1);
+            box lastSecondBox = movements.get(movements.size()-2);
+            ArrayList<String> directions = currentPlayer.getDirections();
+            String lastDirection = directions.get(directions.size()-1);
+            String lastSecondDirection = directions.get(directions.size()-2);
+            if(isValidMove(lastBox.getRow(), lastBox.getColumn(), getOppositeDirection(lastDirection)) && isValidMove(lastSecondBox.getRow(), lastSecondBox.getColumn(), getOppositeDirection(lastSecondDirection))){
+                currentPlayer.setCurrentBox(lastSecondBox);
+                
+            }
+        }
 
         if (!(board.getBox(newPosition[0], newPosition[1]) instanceof doubleShift)){
             actualPlayer = (actualPlayer + 1) % players.length;
@@ -148,6 +162,30 @@ public class QuoridorGame implements Serializable {
             }   
        }
     }
+
+    public String getOppositeDirection(String direction) {
+        switch (direction) {
+            case "N":
+                return "S";  // Mover hacia el norte tiene la dirección opuesta hacia el sur
+            case "S":
+                return "N";  // Mover hacia el sur tiene la dirección opuesta hacia el norte
+            case "E":
+                return "W";  // Mover hacia el este tiene la dirección opuesta hacia el oeste
+            case "W":
+                return "E";  // Mover hacia el oeste tiene la dirección opuesta hacia el este
+            case "NE":
+                return "SW";  // Mover hacia el noreste tiene la dirección opuesta hacia el suroeste
+            case "NW":
+                return "SE";  // Mover hacia el noroeste tiene la dirección opuesta hacia el sureste
+            case "SE":
+                return "NW";  // Mover hacia el sureste tiene la dirección opuesta hacia el noroeste
+            case "SW":
+                return "NE";  // Mover hacia el suroeste tiene la dirección opuesta hacia el noreste
+            default:
+                throw new IllegalArgumentException("Dirección no válida: " + direction);  // Manejo de dirección inválida
+        }
+    }
+    
     
 
     /**
