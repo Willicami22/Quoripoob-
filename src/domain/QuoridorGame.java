@@ -128,12 +128,12 @@ public class QuoridorGame implements Serializable {
 
         if ((direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW")) && comprobePlayer ){
 
-            throw new QuoripoobException(" move.");
+            throw new QuoripoobException(" Invalid Move.");
 
         }
     
         else if (!isValidMove(newPosition[0], newPosition[1], direction) && !(currentBox instanceof teleporter)) {
-            throw new QuoripoobException("xd");
+            throw new QuoripoobException("Invalid Move");
         }
 
 
