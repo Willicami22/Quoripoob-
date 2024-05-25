@@ -113,55 +113,56 @@ public class QuoridorGame implements Serializable {
         int[] newPosition = new int[2];
         newPosition[0] = currentBox.getRow();
         newPosition[1] = currentBox.getColumn();
-        newPosition = obtainNewPosition(direction, newPosition);     
-
+        newPosition = obtainNewPosition(direction, newPosition);
+    
         if (newPosition[0] < 0 || newPosition[1] > (board.getSize()-1) || newPosition[1]  < 0 || newPosition[0] > (board.getSize()-1)){
-            
-            throw new QuoripoobException(" Invalid move.");   
+            throw new QuoripoobException("Invalid move.");
         }
     
         boolean comprobePlayer = comprobePlayer(newPosition[0], newPosition[1]);
         if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW"))) {
             newPosition = obtainNewPosition(direction, newPosition);
         }
-
-
-        if ((direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW")) && comprobePlayer ){
-
-            throw new QuoripoobException(" Invalid Move.");
-
-        }
     
-        else if (!isValidMove(newPosition[0], newPosition[1], direction) && !(currentBox instanceof teleporter)) {
+        if ((direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW")) && comprobePlayer ){
+            throw new QuoripoobException("Invalid Move.");
+        } else if (!isValidMove(newPosition[0], newPosition[1], direction) && !(currentBox instanceof teleporter)) {
             throw new QuoripoobException("Invalid Move");
         }
-
-
     
         currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
         currentPlayer.setDirections(direction);
         comprobeWinner();
-
-        if (currentBox instanceof goBack){
+    
+        if (board.getBox(newPosition[0], newPosition[1]) instanceof goBack) {
             ArrayList<box> movements = currentPlayer.getMovements();
-            box lastBox = movements.get(movements.size()-1);
-            box lastSecondBox = movements.get(movements.size()-2);
             ArrayList<String> directions = currentPlayer.getDirections();
-            String lastDirection = directions.get(directions.size()-1);
-            String lastSecondDirection = directions.get(directions.size()-2);
-            if(isValidMove(lastBox.getRow(), lastBox.getColumn(), getOppositeDirection(lastDirection)) && isValidMove(lastSecondBox.getRow(), lastSecondBox.getColumn(), getOppositeDirection(lastSecondDirection))){
-                currentPlayer.setCurrentBox(lastSecondBox);
+            
+            if (movements.size() >= 3 && directions.size() >= 2) {
+                box lastBox = movements.get(movements.size() - 2);
+                box lastSecondBox = movements.get(movements.size() - 3);
+                String lastDirection = directions.get(directions.size() - 1);
+                String lastSecondDirection = directions.get(directions.size() - 2);
                 
+                if (isValidMove(lastBox.getRow(), lastBox.getColumn(), getOppositeDirection(lastDirection)) 
+                    && isValidMove(lastSecondBox.getRow(), lastSecondBox.getColumn(), getOppositeDirection(lastSecondDirection))) {
+                    
+                    currentPlayer.setCurrentBox(lastSecondBox);
+
+                }
+            } else {
+                throw new QuoripoobException("Not enough movements to go back.");
             }
         }
-
-        if (!(board.getBox(newPosition[0], newPosition[1]) instanceof doubleShift)){
+    
+        if (!(board.getBox(newPosition[0], newPosition[1]) instanceof doubleShift)) {
             actualPlayer = (actualPlayer + 1) % players.length;
-            if(vsMachine){
+            if (vsMachine) {
                 playMachine();
-            }   
-       }
+            }
+        }
     }
+    
 
     public String getOppositeDirection(String direction) {
         switch (direction) {

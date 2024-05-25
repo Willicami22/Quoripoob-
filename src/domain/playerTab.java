@@ -105,4 +105,17 @@ public class playerTab implements Serializable{
     public void setDirections(String direction){
         directions.add(direction);
     }
-}
+
+    public void removeLastMovements(int num){
+        for(int z=0;z<num;z++){
+        movements.remove(movements.size() - 1);
+        }
+    }
+
+    public void removeLastDirections(int num){
+        for(int z=0;z<num;z++){
+            directions.remove(directions.size() - 1);
+            }
+        }
+    }
+
