@@ -51,11 +51,11 @@ public class QuoridorGUI extends JFrame {
     
 
     private JPanel choseSpecials;
-    private JTextField normalBarriersField,temporaryBarriersField,largeBarriersField, alliedBarriersField,totalSpecialTilesField;
+    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField;
     private ArrayList<JCheckBox> specialTileCheckBoxes;
     private ArrayList<JTextField> specialTileQuantityFields;
     private JButton submitButton;
-    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLargeLabel;
+    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLongLabel;
  
     private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
     private JLabel player1Label, player2Label,barrierTypeLabel;
@@ -129,7 +129,7 @@ public class QuoridorGUI extends JFrame {
         addLabeledField(choseSpecials, gbc, row++, "Normal Barriers:", normalBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Allied Barriers:", alliedBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
-        addLabeledField(choseSpecials, gbc, row++, "Large Barriers:", largeBarriersField = new JTextField());
+        addLabeledField(choseSpecials, gbc, row++, "Long Barriers:", longBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Total Special Tiles:", totalSpecialTilesField = new JTextField());
     
         specialTileCheckBoxes = new ArrayList<>();
@@ -175,7 +175,7 @@ public class QuoridorGUI extends JFrame {
                 amountNormalLabel.setText(normalBarriersField.getText());
                 amountAlliedLabel.setText(alliedBarriersField.getText());
                 amountTemporaryLabel.setText(temporaryBarriersField.getText());
-                amountLargeLabel.setText(largeBarriersField.getText());
+                amountLongLabel.setText(longBarriersField.getText());
             }
         });
     }
@@ -440,7 +440,7 @@ public class QuoridorGUI extends JFrame {
         columnTextField = new JTextField();
         placePanel.add(columnTextField);
         placePanel.add(new JLabel("Type:"));
-        JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Large"});
+        JComboBox<String> typeComboBox = new JComboBox<>(new String[]{"Normal", "Allied", "Temporary", "Long"});
         placePanel.add(typeComboBox);
         putBarrier = new JButton("Put Barrier");
         placePanel.add(putBarrier);
@@ -496,8 +496,8 @@ public class QuoridorGUI extends JFrame {
         amountAlliedLabel = new JLabel();
         JLabel temporaryLabel = new JLabel("Temporary:");
         amountTemporaryLabel = new JLabel();
-        JLabel largeLabel = new JLabel("Large:");
-        amountLargeLabel = new JLabel();
+        JLabel longLabel = new JLabel("Long:");
+        amountLongLabel = new JLabel();
 
         remainingBarriersGrid.add(barrierTypeLabel);
         remainingBarriersGrid.add(amountALabel);
@@ -507,8 +507,8 @@ public class QuoridorGUI extends JFrame {
         remainingBarriersGrid.add(amountAlliedLabel);
         remainingBarriersGrid.add(temporaryLabel);
         remainingBarriersGrid.add(amountTemporaryLabel);
-        remainingBarriersGrid.add(largeLabel);
-        remainingBarriersGrid.add(amountLargeLabel);
+        remainingBarriersGrid.add(longLabel);
+        remainingBarriersGrid.add(amountLongLabel);
         
 
         barriersInfoPanel.add(remainingBarriersLabel, BorderLayout.NORTH);
@@ -915,7 +915,7 @@ private void optionSave() {
         try {
             int normalBarriers = Integer.parseInt(normalBarriersField.getText());
             int temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
-            int longBarriers = Integer.parseInt(largeBarriersField.getText());
+            int longBarriers = Integer.parseInt(longBarriersField.getText());
             int alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
             int totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
 
