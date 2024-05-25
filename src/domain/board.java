@@ -22,8 +22,10 @@ public class board implements Serializable {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 boxes[i][j] = new box(i, j);
-            }
+            }        
         }
+        boxes[1][4]=new doubleShift(1, 4);
+        boxes[1][5]=new teleporter(1, 5);
     }
 
     /**
@@ -48,5 +50,9 @@ public class board implements Serializable {
      */
     public int getSize() {
         return size;
+    }
+
+    public box[][] getBoxes(){
+        return boxes;
     }
 }

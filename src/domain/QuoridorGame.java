@@ -109,28 +109,44 @@ public class QuoridorGame implements Serializable {
         if (currentBox == null) {
             throw new QuoripoobException("Current box not found for player.");
         }
-    
+        
         int[] newPosition = new int[2];
         newPosition[0] = currentBox.getRow();
         newPosition[1] = currentBox.getColumn();
-        newPosition = obtainNewPosition(direction, newPosition);
+        newPosition = obtainNewPosition(direction, newPosition);     
+
+        if (newPosition[0] < 0 || newPosition[1] > (board.getSize()-1) || newPosition[1]  < 0 || newPosition[0] > (board.getSize()-1)){
+            
+            throw new QuoripoobException(" Invalid move.");   
+        }
     
         boolean comprobePlayer = comprobePlayer(newPosition[0], newPosition[1]);
-        if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("WE"))) {
+        if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW"))) {
             newPosition = obtainNewPosition(direction, newPosition);
         }
-    
-        if (!isValidMove(newPosition[0], newPosition[1], direction)) {
-            throw new QuoripoobException("Invalid move.");
+
+
+        if ((direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW")) && comprobePlayer ){
+
+            throw new QuoripoobException(" move.");
+
         }
+    
+        else if (!isValidMove(newPosition[0], newPosition[1], direction) && !(currentBox instanceof teleporter)) {
+            throw new QuoripoobException("xd");
+        }
+
+
     
         currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
         comprobeWinner();
-        actualPlayer = (actualPlayer + 1) % players.length;
 
-        if(vsMachine){
-            playMachine();
-        }
+        if (!(board.getBox(newPosition[0], newPosition[1]) instanceof doubleShift)){
+            actualPlayer = (actualPlayer + 1) % players.length;
+            if(vsMachine){
+                playMachine();
+            }   
+       }
     }
     
 
@@ -141,41 +157,43 @@ public class QuoridorGame implements Serializable {
      * @param newPosition The current position of the player's piece.
      * @return The new position after moving in the specified direction.
      */
-    public int[] obtainNewPosition(String direction, int[] newPosition){
+    public int[] obtainNewPosition(String direction, int[] newPosition) throws QuoripoobException {
         switch (direction) {
-            case "S":
-                newPosition[0]--;
-                break;
             case "N":
-                newPosition[0]++;
+                newPosition[0]++;  // Mover hacia el norte incrementa la coordenada X
+                break;
+            case "S":
+                newPosition[0]--;  // Mover hacia el sur decrementa la coordenada X
                 break;
             case "E":
-                newPosition[1]--;
+                newPosition[1]--;  // Mover hacia el este incrementa la coordenada Y
                 break;
             case "W":
-                newPosition[1]++;
-                break;
-            case "SE":
-                newPosition[1]++;
-                newPosition[0]--;
-                break;
-            case "SW":
-                newPosition[1]--;
-                newPosition[0]--;
+                newPosition[1]++;  // Mover hacia el oeste decrementa la coordenada Y
                 break;
             case "NE":
-                newPosition[1]++;
-                newPosition[0]++;
+                newPosition[0]++;  // Mover hacia el noreste incrementa la coordenada X
+                newPosition[1]++;  // Mover hacia el noreste incrementa la coordenada Y
                 break;
             case "NW":
-                newPosition[1]--;
-                newPosition[0]++;
+                newPosition[0]++;  // Mover hacia el noroeste incrementa la coordenada X
+                newPosition[1]--;  // Mover hacia el noroeste decrementa la coordenada Y
+                break;
+            case "SE":
+                newPosition[0]--;  // Mover hacia el sureste decrementa la coordenada X
+                newPosition[1]++;  // Mover hacia el sureste incrementa la coordenada Y
+                break;
+            case "SW":
+                newPosition[0]--;  // Mover hacia el suroeste decrementa la coordenada X
+                newPosition[1]--;  // Mover hacia el suroeste decrementa la coordenada Y
                 break;
             default:
-                break;
+                throw new QuoripoobException("Invalid direction.");
         }
         return newPosition;
     }
+    
+    
 
     /**
      * Places a barrier on the board at the specified location and orientation.
@@ -359,8 +377,10 @@ public class QuoridorGame implements Serializable {
      * @param direction The direction of the move.
      * @return true if the move is valid, false otherwise.
      */
-    public boolean isValidMove(int newRow, int newColumn, String direction){
+    public boolean isValidMove(int newRow, int newColumn, String direction) throws QuoripoobException{
+
         boolean isValid = true;
+
          
         box newBox = board.getBox(newRow, newColumn);
 
@@ -378,9 +398,6 @@ public class QuoridorGame implements Serializable {
             }
         }
         
-        if (newRow < 0 && newRow > board.getSize() && newColumn < 0 && newColumn > board.getSize()){
-            isValid = false;
-        }
         
         return isValid;
     }
@@ -416,7 +433,7 @@ public class QuoridorGame implements Serializable {
      * @param newBox The box to move to.
      * @return true if there is a barrier obstructing the movement, false otherwise.
      */
-    private boolean checkDiagonalMovements(String direction, box currentBox) {
+    private boolean checkDiagonalMovements(String direction, box currentBox) throws QuoripoobException {
         boolean isPossible = false;
     
         int[] orthogonalPosition = new int[2];
@@ -519,7 +536,7 @@ public class QuoridorGame implements Serializable {
         return players[actualPlayer];
     }
 
-    public boolean canPlayerWin() {
+    public boolean canPlayerWin() throws QuoripoobException {
         playerTab currentPlayer = players[actualPlayer];
         Set<box> visited = new HashSet<>();
         Queue<box> queue = new ArrayDeque<>();

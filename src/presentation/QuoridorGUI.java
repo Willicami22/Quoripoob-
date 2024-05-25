@@ -824,9 +824,6 @@ public class QuoridorGUI extends JFrame {
                 // Cargar el estado del juego desde el archivo
                 Quoripoob = QuoridorGame.open(selectedFile);
     
-                // Actualizar la interfaz de juego para reflejar el estado del juego cargado
-                updateGameBoardUI();
-    
                 // Cambiar al panel de juego (gameBoard)
                 CardLayout cl = (CardLayout) (principal.getLayout());
                 cl.show(principal, "gameBoard");

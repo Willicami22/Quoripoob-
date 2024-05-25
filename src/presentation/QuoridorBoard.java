@@ -23,17 +23,20 @@ public class QuoridorBoard extends JPanel {
 
     private void drawBoard(Graphics g) {
         int boxSize = getWidth() / game.getBoard().getSize();
-        for (int i = 0; i < game.getBoard().getSize(); i++) {
-            for (int j = 0; j < game.getBoard().getSize(); j++) {
-                int x = j * boxSize;
-                int y = i * boxSize;
-                g.setColor(Color.WHITE); 
+        box[][] boxes= game.getBoard().getBoxes();
+        for (box[] i: boxes) {
+            for (box j: i) {
+                int x = j.getColumn() * boxSize;
+                int y = j.getRow() * boxSize;
+
+                g.setColor(j.getColor()); 
                 g.fillRect(x, y, boxSize, boxSize);
                 g.setColor(Color.BLACK); 
                 g.drawRect(x, y, boxSize, boxSize);
+                }
             }
         }
-    }
+    
 
     private void drawPlayers(Graphics g) {
         int boxSize = getWidth() / game.getBoard().getSize();

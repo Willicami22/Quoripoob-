@@ -1,5 +1,6 @@
 package domain;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class box implements Serializable {
     protected int column;
     protected boolean isNormal;
     protected Map<String, barrier> barriers;
+    protected Color color;
 
     /**
      * Constructs a box with the specified row and column.
@@ -29,6 +31,8 @@ public class box implements Serializable {
         barriers.put("N", null);
         barriers.put("E", null);
         barriers.put("W", null);
+
+        this.color=new Color(210, 180, 140);;
     }    
 
     /**
@@ -83,6 +87,10 @@ public class box implements Serializable {
     public void eraseBarrier(String direction){
         barriers.put(direction, null);
 
+    }
+
+    public Color getColor(){
+        return color;
     }
  }
 
