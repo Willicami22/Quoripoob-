@@ -32,7 +32,7 @@ public class box implements Serializable {
         barriers.put("E", null);
         barriers.put("W", null);
 
-        this.color=new Color(210, 180, 140);;
+        this.color=new Color(210, 180, 140);
     }    
 
     /**
@@ -53,16 +53,6 @@ public class box implements Serializable {
         return column;
     }
 
-    /**
-     * Checks if there is a barrier in the specified direction.
-     * 
-     * @param direction The direction to check.
-     * @return true if there is a barrier, false otherwise.
-     */
-    public boolean thereIsABarrier(String direction){
-        barrier barrier = barriers.get(direction);
-        return (barrier != null);
-    }
 
     /**
      * Checks if the box has a barrier in the specified direction.
@@ -94,7 +84,7 @@ public class box implements Serializable {
     }
 
     public void comprobeBarrier() {
-        // Comprobar si hay una barrera temporal en la dirección "N"
+        // Check if there's a temporary barrier in the "N" direction
         if (barriers.containsKey("N") && barriers.get("N") instanceof temporary) {
             temporary barrierN = (temporary) barriers.get("N");
             if (barrierN.comprobeBarrier()) {
@@ -102,7 +92,7 @@ public class box implements Serializable {
             }
         }
     
-        // Comprobar si hay una barrera temporal en la dirección "E"
+        // Check if there's a temporary barrier in the "E" direction
         if (barriers.containsKey("E") && barriers.get("E") instanceof temporary) {
             temporary barrierE = (temporary) barriers.get("E");
             if (barrierE.comprobeBarrier()) {
@@ -110,15 +100,15 @@ public class box implements Serializable {
             }
         }
     
-        // Comprobar si hay una barrera temporal en la dirección "S"
+        // Check if there's a temporary barrier in the "S" direction
         if (barriers.containsKey("S") && barriers.get("S") instanceof temporary) {
             temporary barrierS = (temporary) barriers.get("S");
             if (barrierS.comprobeBarrier()) {
                 barriers.put("S", null);
             }
-        }
+        }   
     
-        // Comprobar si hay una barrera temporal en la dirección "W"
+        // Check if there's a temporary barrier in the "W" direction
         if (barriers.containsKey("W") && barriers.get("W") instanceof temporary) {
             temporary barrierW = (temporary) barriers.get("W");
             if (barrierW.comprobeBarrier()) {
@@ -131,5 +121,4 @@ public class box implements Serializable {
         return barriers.get(direction);
     }
 }
-
 

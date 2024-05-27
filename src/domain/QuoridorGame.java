@@ -2,38 +2,32 @@ package domain;
 
 import java.awt.Color;
 import java.util.*;
-
 import java.io.*;
-
 import javax.swing.JOptionPane;
+import presentation.QuoridorGUI;
 
+/**
+ * The QuoridorGame class represents the main game logic of the Quoridor game.
+ * It manages players, the game board, and various game settings.
+ */
+public class QuoridorGame implements Serializable {
+
+    private static final long serialVersionUID = 1L; 
+    private playerTab[] players; // Array to store players participating in the game.
+    private board board; // Instance of the game board.
+    private int actualPlayer; // Index of the currently active player.
+    private boolean vsMachine = true; // Flag indicating if the game is played against a machine or human.
+    private String mode; // The game mode (e.g., "Single Player", "Multiplayer").
+    private String difficult; // The difficulty level for the machine player.
+    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Array defining possible movement directions.
 
     /**
      * Constructs a new instance of QuoridorGame.
      * Initializes the game with a board size of 9x9 and sets up initial player positions.
      */
-
-public class QuoridorGame implements Serializable {
-
-    private static final long serialVersionUID = 1L; 
-    private playerTab[] players;
-    private board board;
-    private int actualPlayer;
-    private boolean vsMachine=true;
-    private String mode;
-    private String difficult;
-    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-
-
-
-
-    public QuoridorGame(){
-        
-    
-        board= new board(9);
-        players= new playerTab[2];
-        actualPlayer=0;
-
+    public QuoridorGame() {
+        players = new playerTab[2]; // Initializes the array to store two players.
+        actualPlayer = 0; // Initializes the active player index to 0.
     }
 
     /**
@@ -41,8 +35,8 @@ public class QuoridorGame implements Serializable {
      * 
      * @param difficult The difficulty level to set.
      */
-    public void setDifficult(String difficult){
-        this.difficult=difficult;
+    public void setDifficult(String difficult) {
+        this.difficult = difficult;
     }
 
     /**
@@ -50,13 +44,8 @@ public class QuoridorGame implements Serializable {
      * 
      * @param player The player mode to set. "M" for machine, "H" for human.
      */
-    public void setPlayer(String player){
-        if (player=="M"){
-            vsMachine=true;
-        }
-        else{
-            vsMachine=false;
-        }
+    public void setPlayer(String player) {
+        vsMachine = (player.equals("M")); // Sets vsMachine flag based on the player mode.
     }
 
     /**
@@ -64,8 +53,8 @@ public class QuoridorGame implements Serializable {
      * 
      * @param mode The game mode to set.
      */
-    public void setMode(String mode){
-        this.mode=mode;
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 
     /**
@@ -76,9 +65,11 @@ public class QuoridorGame implements Serializable {
      * @param color The color of the player's pieces.
      */
     public void setPlayers(int player, String name, Color color) {
-        box BoxInit = (player == 0) ? board.getBox(0, 4) : board.getBox(8, 4);
-        int winningRow = (player == 0) ? 8 : 0;
+        // Determines the initial position and winning row based on the player number.
+        box BoxInit = (player == 0) ? board.getBox(0, (int)Math.ceil(board.getSize() / 2.0) - 1) : board.getBox(board.getSize() - 1, (int)Math.ceil(board.getSize() / 2.0) - 1);
+        int winningRow = (player == 0) ? board.getSize()-1 : 0;
 
+        // Creates a new player object based on the player mode (human or machine).
         if (player == 0 || (player == 1 && !vsMachine)) {
             player playerGame = new player(BoxInit, color, name, winningRow);
             players[player] = playerGame;
@@ -88,98 +79,318 @@ public class QuoridorGame implements Serializable {
         }
     }
 
-    public void setBarriers(int normalBarriers,int alliedBarriers,int temporaryBarriers, int largeBarriers){
-        for(playerTab p: players){
-            p.startBarriers(normalBarriers,alliedBarriers,temporaryBarriers,largeBarriers);
+    /**
+     * Sets the number of barriers for each player.
+     * 
+     * @param normalBarriers The number of normal barriers.
+     * @param alliedBarriers The number of allied barriers.
+     * @param temporaryBarriers The number of temporary barriers.
+     * @param largeBarriers The number of large barriers.
+     */
+    public void setBarriers(int normalBarriers, int alliedBarriers, int temporaryBarriers, int largeBarriers) {
+        for(playerTab p : players) {
+            p.startBarriers(normalBarriers, alliedBarriers, temporaryBarriers, largeBarriers);
         }
     }
-    
 
     /**
+     * Sets up the game board with the specified size.
+     * 
+     * @param size The size of the game board.
+     */
+    public void setBoard(int size) {
+        board = new board(size);
+    }
+
+  /**
      * Moves the player's piece in the specified direction.
      * 
      * @param direction The direction in which to move the player's piece.
      * @throws QuoripoobException If an error occurs during the move.
      */
     public void moveTab(String direction) throws QuoripoobException {
-        if (actualPlayer < 0 || actualPlayer >= players.length) {
-            throw new QuoripoobException("Invalid player index.");
-        }
+        validatePlayerIndex();
     
         playerTab currentPlayer = players[actualPlayer];
-        if (currentPlayer == null) {
-            throw new QuoripoobException("Current player not found.");
-        }
-    
         box currentBox = currentPlayer.getCurrentBox();
-        if (currentBox == null) {
-            throw new QuoripoobException("Current box not found for player.");
-        }
-        
-        int[] newPosition = new int[2];
-        newPosition[0] = currentBox.getRow();
-        newPosition[1] = currentBox.getColumn();
-        newPosition = obtainNewPosition(direction, newPosition);
+        int[] newPosition = obtainNewPosition(direction, new int[]{currentBox.getRow(), currentBox.getColumn()});
     
-        if (newPosition[0] < 0 || newPosition[1] > (board.getSize()-1) || newPosition[1]  < 0 || newPosition[0] > (board.getSize()-1)){
-            throw new QuoripoobException("Invalid move.");
-        }
+        validateNewPosition(newPosition);
     
-        boolean comprobePlayer = comprobePlayer(newPosition[0], newPosition[1]);
-        if (comprobePlayer && !(direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW"))) {
+        if (shouldRecalculatePosition(direction, newPosition,currentPlayer.isStar()) && isValidMove(newPosition[0], newPosition[1], direction, currentPlayer.isStar())) {
             newPosition = obtainNewPosition(direction, newPosition);
         }
     
-        if ((direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW")) && comprobePlayer ){
-            throw new QuoripoobException("Invalid Move.");
-        } else if (!isValidMove(newPosition[0], newPosition[1], direction) && !(currentBox instanceof teleporter)) {
-            throw new QuoripoobException("Invalid Move");
-        }
+        validateFinalPosition(newPosition, direction, currentPlayer, currentBox);
     
-        currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
-        currentPlayer.setDirections(direction);
-        board.comprobeBarrier();
-        comprobeWinner();
-    
-        if (board.getBox(newPosition[0], newPosition[1]) instanceof goBack) {
-            ArrayList<box> movements = currentPlayer.getMovements();
-            ArrayList<String> directions = currentPlayer.getDirections();
-            
-            if (movements.size() >= 3 && directions.size() >= 2) {
-                box lastBox = movements.get(movements.size() - 2);
-                box lastSecondBox = movements.get(movements.size() - 3);
-                String lastDirection = directions.get(directions.size() - 1);
-                String lastSecondDirection = directions.get(directions.size() - 2);
-                
-                if (isValidMove(lastBox.getRow(), lastBox.getColumn(), getOppositeDirection(lastDirection)) 
-                    && isValidMove(lastSecondBox.getRow(), lastSecondBox.getColumn(), getOppositeDirection(lastSecondDirection))) {
-                    
-                    currentPlayer.setCurrentBox(lastSecondBox);
-
-                }
-            } else {
-                throw new QuoripoobException("Not enough movements to go back.");
-            }
-        }
+        updatePlayerPosition(currentPlayer, newPosition, direction);
+        handleSpecialBoxes(currentPlayer, newPosition);
     
         if (!(board.getBox(newPosition[0], newPosition[1]) instanceof doubleShift)) {
-            actualPlayer = (actualPlayer + 1) % players.length;
+            moveToNextPlayer();
             if (vsMachine) {
                 playMachine();
             }
         }
-        
     }
     
+    /**
+     * Validates whether the player index is within bounds.
+     * 
+     * @throws QuoripoobException If the player index is out of bounds.
+     */
+    private void validatePlayerIndex() throws QuoripoobException {
+        if (actualPlayer < 0 || actualPlayer >= players.length) {
+            throw new QuoripoobException("Invalid player index.");
+        }
+    }
+    
+    /**
+     * Validates whether the new position is within the bounds of the board.
+     * 
+     * @param newPosition The new position to validate.
+     * @throws QuoripoobException If the new position is out of bounds.
+     */
+    private void validateNewPosition(int[] newPosition) throws QuoripoobException {
+        int boardSize = board.getSize();
+        if (newPosition[0] < 0 || newPosition[1] >= boardSize || newPosition[1] < 0 || newPosition[0] >= boardSize) {
+            throw new QuoripoobException("Invalid move.");
+        }
+    }
+    
+    /**
+     * Determines whether to recalculate the position based on the direction and the presence of another player.
+     * 
+     * @param direction The direction in which to move.
+     * @param newPosition The new position to consider.
+     * @param star A boolean indicating if the player has a star power-up.
+     * @return True if the position should be recalculated, false otherwise.
+     * @throws QuoripoobException If the direction is invalid.
+     */
+    private boolean shouldRecalculatePosition(String direction, int[] newPosition, boolean star) throws QuoripoobException {
+        return comprobePlayer(newPosition[0], newPosition[1]) &&
+               !isDiagonalDirection(direction);
+    }
+    
+    /**
+     * Checks if the direction represents a diagonal movement.
+     * 
+     * @param direction The direction to check.
+     * @return True if the direction is diagonal, false otherwise.
+     */
+    private boolean isDiagonalDirection(String direction) {
+        return direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW");
+    }
+    
+    /**
+     * Validates the final position after considering the movement direction.
+     * 
+     * @param newPosition The new position after movement.
+     * @param direction The direction of movement.
+     * @param currentPlayer The current player.
+     * @param currentBox The current box of the player.
+     * @throws QuoripoobException If the final position is invalid.
+     */
+    private void validateFinalPosition(int[] newPosition, String direction, playerTab currentPlayer, box currentBox) throws QuoripoobException {
+        if (isDiagonalDirection(direction) && comprobePlayer(newPosition[0], newPosition[1])) {
+            throw new QuoripoobException("Invalid Move.");
+        } else if (!isValidMove(newPosition[0], newPosition[1], direction, currentPlayer.isStar()) && !(currentBox instanceof teleporter)) {
+            throw new QuoripoobException("Invalid Move");
+        }
+    }
+    
+    /**
+     * Updates the player's position on the board after movement.
+     * 
+     * @param currentPlayer The current player.
+     * @param newPosition The new position after movement.
+     * @param direction The direction of movement.
+     */
+    private void updatePlayerPosition(playerTab currentPlayer, int[] newPosition, String direction) {
+        currentPlayer.updateStar();
+        currentPlayer.setCurrentBox(board.getBox(newPosition[0], newPosition[1]));
+        currentPlayer.setDirections(direction);
+        board.comprobeBarrier();
+        comprobeWinner();
+    }
+    
+    
+    /**
+     * Handles special boxes that the player might encounter after movement.
+     * 
+     * @param currentPlayer The current player.
+     * @param newPosition The new position after movement.
+     * @throws QuoripoobException If there is an error while handling special boxes.
+     */
+    private void handleSpecialBoxes(playerTab currentPlayer, int[] newPosition) throws QuoripoobException {
+        box newBox = board.getBox(newPosition[0], newPosition[1]);
+    
+        if (newBox instanceof goBack) {
+            handleGoBack(currentPlayer);
+        } else if (newBox instanceof star) {
+            currentPlayer.nowStar();
+        }
+    }
+    
+    /**
+     * Handles the "go back" special box if encountered after movement.
+     * 
+     * @param currentPlayer The current player.
+     * @throws QuoripoobException If there are not enough movements to go back.
+     */
+    private void handleGoBack(playerTab currentPlayer) throws QuoripoobException {
+        ArrayList<box> movements = currentPlayer.getMovements();
+        ArrayList<String> directions = currentPlayer.getDirections();
+    
+        if (movements.size() >= 3 && directions.size() >= 2) {
+            box lastBox = movements.get(movements.size() - 2);
+            box lastSecondBox = movements.get(movements.size() - 3);
+            String lastDirection = directions.get(directions.size() - 1);
+            String lastSecondDirection = directions.get(directions.size() - 2);
+    
+            if (isValidMove(lastBox.getRow(), lastBox.getColumn(), getOppositeDirection(lastDirection), currentPlayer.isStar()) &&
+                isValidMove(lastSecondBox.getRow(), lastSecondBox.getColumn(), getOppositeDirection(lastSecondDirection), currentPlayer.isStar())) {
+                currentPlayer.setCurrentBox(lastSecondBox);
+            }
+        } else {
+            throw new QuoripoobException("Not enough movements to go back.");
+        }
+    }
+    
+    /**
+     * Moves to the next player in the game.
+     */
+    private void moveToNextPlayer() {
+        actualPlayer = (actualPlayer + 1) % players.length;
+    }
+    
+    /**
+     * Checks if there is a player at the specified row and column.
+     * 
+     * @param row The row to check.
+     * @param column The column to check.
+     * @return True if a player is found, false otherwise.
+     */
+    public boolean comprobePlayer(int row, int column) {
+        int indexOtherPlayer = (actualPlayer + 1) % players.length;
+        playerTab otherPlayer = players[indexOtherPlayer];
+        box boxOther = otherPlayer.getCurrentBox();
+        return boxOther.getColumn() == column && boxOther.getRow() == row;
+    }
+    
+    /**
+     * Checks if the proposed move is valid.
+     * 
+     * @param newRow The new row after movement.
+     * @param newColumn The new column after movement.
+     * @param direction The direction of movement.
+     * @param star A boolean indicating if the player has a star power-up.
+     * @return True if the move is valid, false otherwise.
+     * @throws QuoripoobException If there is an error while validating the move.
+     */
+    public boolean isValidMove(int newRow, int newColumn, String direction, boolean star) throws QuoripoobException {
+        box newBox = board.getBox(newRow, newColumn);
+    
+        if (isOrthogonalDirection(direction)) {
+            return !checkOrthogonalMovements(direction, newBox, star);
+        } else {
+            return checkDiagonalMovements(direction, newBox,star);
+        }
+    }
+    
+    /**
+     * Checks if the direction represents an orthogonal movement.
+     * 
+     * @param direction The direction to check.
+     * @return True if the direction is orthogonal, false otherwise.
+     */
+    private boolean isOrthogonalDirection(String direction) {
+        return direction.equals("S") || direction.equals("E") || direction.equals("N") || direction.equals("W");
+    }
+    
+    /**
+     * Checks for barriers in orthogonal movements.
+     * 
+     * @param direction The direction of movement.
+     * @param newBox The box to move into.
+     * @param star A boolean indicating if the player has a star power-up.
+     * @return True if there is a barrier, false otherwise.
+     */
+    private boolean checkOrthogonalMovements(String direction, box newBox, boolean star) {
+        boolean hasBarrier = newBox.hasBarrier(direction);
+    
+        if (hasBarrier) {
+            barrier barrier = newBox.getBarrier(direction);
+            if (barrier instanceof allied) {
+                allied alliedBarrier = (allied) barrier;
+                if (alliedBarrier.getOwner() == getActualPlayer()) {
+                    return false;
+                }
+            } else if (barrier instanceof large && star) {
+                return false;
+            }
+        }
+    
+        return hasBarrier;
+    }
 
+    /**
+     * Checks for barriers in diagonal movements.
+     * 
+     * @param direction The direction of diagonal movement.
+     * @param currentBox The current box of the player.
+     * @param star A boolean indicating if the player has a star power-up.
+     * @return True if there are valid diagonal movements, false otherwise.
+     * @throws QuoripoobException If there is an error while checking diagonal movements.
+     */
+    private boolean checkDiagonalMovements(String direction, box currentBox, boolean star) throws QuoripoobException {
+        boolean isPossible = false;
+    
+        int[] orthogonalPosition1 = {currentBox.getRow(), currentBox.getColumn()};
+        int[] orthogonalPosition2 = {currentBox.getRow(), currentBox.getColumn()};
+    
+        char firstDirection = direction.charAt(0);
+        char secondDirection = direction.charAt(1);
+    
+        orthogonalPosition1 = obtainNewPosition(String.valueOf(firstDirection), orthogonalPosition1);
+        orthogonalPosition2 = obtainNewPosition(String.valueOf(secondDirection), orthogonalPosition2);
+    
+        // Check for an adjacent player and a barrier preventing the jump in the first direction
+        if (comprobePlayer(orthogonalPosition1[0], orthogonalPosition1[1])) {
+            box adjacentBox1 = board.getBox(orthogonalPosition1[0], orthogonalPosition1[1]);
+            if (!checkOrthogonalMovements(String.valueOf(firstDirection), adjacentBox1, star)) {
+                isPossible = true;
+            }
+        }
+    
+        // Check for an adjacent player and a barrier preventing the jump in the second direction
+        if (comprobePlayer(orthogonalPosition2[0], orthogonalPosition2[1])) {
+            box adjacentBox2 = board.getBox(orthogonalPosition2[0], orthogonalPosition2[1]);
+            if (!checkOrthogonalMovements(String.valueOf(secondDirection), adjacentBox2, star)) {
+                isPossible = true;
+            }
+        }
+    
+        return isPossible;
+    }
+    
+    
+
+    /**
+     * Retrieves the opposite direction of the given direction.
+     * 
+     * @param direction The input direction.
+     * @return The opposite direction.
+     */
     public String getOppositeDirection(String direction) {
         switch (direction) {
             case "N":
-                return "S";  // Mover hacia el norte tiene la dirección opuesta hacia el sur
+                return "S";  // Moving north has the opposite direction of south
             case "S":
-                return "N";  // Mover hacia el sur tiene la dirección opuesta hacia el norte
+                return "N";  // Moving south has the opposite direction of north
             case "E":
-                return "W";  // Mover hacia el este tiene la dirección opuesta hacia el oeste
+                return "W"; 
+
             case "W":
                 return "E";  // Mover hacia el oeste tiene la dirección opuesta hacia el este
             case "NE":
@@ -197,217 +408,264 @@ public class QuoridorGame implements Serializable {
     
     
 
-    /**
-     * Obtains the new position based on the current position and direction.
-     * 
-     * @param direction The direction in which to move.
-     * @param newPosition The current position of the player's piece.
-     * @return The new position after moving in the specified direction.
-     */
-    public int[] obtainNewPosition(String direction, int[] newPosition) throws QuoripoobException {
-        switch (direction) {
-            case "N":
-                newPosition[0]++;  // Mover hacia el norte incrementa la coordenada X
-                break;
-            case "S":
-                newPosition[0]--;  // Mover hacia el sur decrementa la coordenada X
-                break;
-            case "E":
-                newPosition[1]--;  // Mover hacia el este incrementa la coordenada Y
-                break;
-            case "W":
-                newPosition[1]++;  // Mover hacia el oeste decrementa la coordenada Y
-                break;
-            case "NE":
-                newPosition[0]++;  // Mover hacia el noreste incrementa la coordenada X
-                newPosition[1]++;  // Mover hacia el noreste incrementa la coordenada Y
-                break;
-            case "NW":
-                newPosition[0]++;  // Mover hacia el noroeste incrementa la coordenada X
-                newPosition[1]--;  // Mover hacia el noroeste decrementa la coordenada Y
-                break;
-            case "SE":
-                newPosition[0]--;  // Mover hacia el sureste decrementa la coordenada X
-                newPosition[1]++;  // Mover hacia el sureste incrementa la coordenada Y
-                break;
-            case "SW":
-                newPosition[0]--;  // Mover hacia el suroeste decrementa la coordenada X
-                newPosition[1]--;  // Mover hacia el suroeste decrementa la coordenada Y
-                break;
-            default:
-                throw new QuoripoobException("Invalid direction.");
-        }
-        return newPosition;
+   /**
+ * Obtains the new position based on the current position and direction.
+ * 
+ * @param direction The direction in which to move.
+ * @param newPosition The current position of the player's piece.
+ * @return The new position after moving in the specified direction.
+ * @throws QuoripoobException If the direction is invalid.
+ */
+public int[] obtainNewPosition(String direction, int[] newPosition) throws QuoripoobException {
+    switch (direction) {
+        case "N":
+            newPosition[0]++;  // Moving north increments the X coordinate
+            break;
+        case "S":
+            newPosition[0]--;  // Moving south decrements the X coordinate
+            break;
+        case "E":
+            newPosition[1]--;  // Moving east decrements the Y coordinate
+            break;
+        case "W":
+            newPosition[1]++;  // Moving west increments the Y coordinate
+            break;
+        case "NE":
+            newPosition[0]++;  // Moving northeast increments the X coordinate
+            newPosition[1]++;  // Moving northeast increments the Y coordinate
+            break;
+        case "NW":
+            newPosition[0]++;  // Moving northwest increments the X coordinate
+            newPosition[1]--;  // Moving northwest decrements the Y coordinate
+            break;
+        case "SE":
+            newPosition[0]--;  // Moving southeast decrements the X coordinate
+            newPosition[1]++;  // Moving southeast increments the Y coordinate
+            break;
+        case "SW":
+            newPosition[0]--;  // Moving southwest decrements the X coordinate
+            newPosition[1]--;  // Moving southwest decrements the Y coordinate
+            break;
+        default:
+            throw new QuoripoobException("Invalid direction.");
     }
-    
-    
+    return newPosition;
+}
 
-    /**
-     * Places a barrier on the board at the specified location and orientation.
-     * 
-     * @param rowInit The initial row position of the barrier.
-     * @param columnInit The initial column position of the barrier.
-     * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
-     * @throws QuoripoobException If the barrier placement is invalid.
-     */
-    public void putBarrier(int rowInit, int columnInit, String orientation,String type) throws QuoripoobException { 
+/**
+ * Places a barrier on the board at the specified location and orientation.
+ * 
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @throws QuoripoobException If the barrier placement is invalid or if the player has insufficient barriers.
+ */
+public void putBarrier(int rowInit, int columnInit, String orientation, String type) throws QuoripoobException {
 
-    if(getActualPlayer().getNumberBarrier(type)>0 ){
+    if (getActualPlayer().getNumberBarrier(type) > 0) {
 
-        if (!isValidBarrierPlacement(rowInit, columnInit, orientation,type)) {
+        if (!isValidBarrierPlacement(rowInit, columnInit, orientation, type)) {
             throw new QuoripoobException("Invalid barrier placement");
+        }
+        barrier barrier = createBarrier(type, orientation);
 
-        }
-        barrier barrier;
-        if (type=="Large"){
-            barrier= new large(true);
-        }
-        else if(type=="Allied"){
-            barrier= new allied( getActualPlayer());
-        }
 
-        else if(type=="Temporary"){
-            barrier= new temporary(getActualPlayer(),true);
-        }
-        else{
-            barrier = new barrier(true);
-        }
+        setBarrier(rowInit, columnInit, barrier, orientation);
 
-        if (orientation.equals("H")) {
-            board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
-            board.getBox(rowInit, columnInit + 1).placeBarrier(barrier, "N");
-            board.getBox(rowInit - 1, columnInit).placeBarrier(barrier, "S");
-            board.getBox(rowInit - 1, columnInit + 1).placeBarrier(barrier, "S");
-            if(barrier instanceof large){
-                board.getBox(rowInit, columnInit + 2).placeBarrier(barrier, "N");
-                board.getBox(rowInit - 1, columnInit+2).placeBarrier(barrier, "S");
-            }
-
-        } else if (orientation.equals("V")) {
-            board.getBox(rowInit, columnInit).placeBarrier(barrier, "W");
-            board.getBox(rowInit + 1, columnInit).placeBarrier(barrier, "W");
-            board.getBox(rowInit, columnInit - 1).placeBarrier(barrier, "E");
-            board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
-            if(barrier instanceof large){
-                board.getBox(rowInit+2, columnInit -1).placeBarrier(barrier, "E");
-                board.getBox(rowInit+2, columnInit-1).placeBarrier(barrier, "W");
-            }
-        } else {
-            throw new QuoripoobException("Invalid orientation");
-        }
-
-        if (!canPlayerWin()) {
-            if (orientation.equals("H")) {
-                board.getBox(rowInit, columnInit).eraseBarrier("N");
-                board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
-                board.getBox(rowInit - 1, columnInit).eraseBarrier("S");
-                board.getBox(rowInit - 1, columnInit + 1).eraseBarrier("S");
-                if(barrier instanceof large){
-                    board.getBox(rowInit, columnInit + 2).eraseBarrier( "N");
-                    board.getBox(rowInit - 1, columnInit+2).eraseBarrier( "S");
-                }
-            } else {
-                board.getBox(rowInit, columnInit).eraseBarrier("W");
-                board.getBox(rowInit + 1, columnInit).eraseBarrier("W");
-                board.getBox(rowInit, columnInit - 1).eraseBarrier("E");
-                board.getBox(rowInit + 1, columnInit - 1).eraseBarrier("E");
-                if(barrier instanceof large){
-                    board.getBox(rowInit+2, columnInit -1).eraseBarrier( "E");
-                    board.getBox(rowInit+2, columnInit-1).eraseBarrier( "W");
-                }
-            }
-            throw new QuoripoobException("El camino bloquea al jugador");
+        if (!canPlayerWin(players[0]) || !canPlayerWin(players[1])) {
+            eraseBarrier(orientation, rowInit, columnInit, barrier);
         }
 
         board.comprobeBarrier();
         getActualPlayer().updateBarrier(type);
-        actualPlayer = (actualPlayer + 1) % players.length;
-    
+        moveToNextPlayer();
+
 
         if (vsMachine) {
             playMachine();
         }
-    }
-    else{
-        throw new QuoripoobException("You dont have more than this barriers");
+    } else {
+        throw new QuoripoobException("You don't have more barriers of this type.");
     }
 }
 
+/**
+ * Checks if a barrier placement is valid.
+ * 
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @return true if the barrier placement is valid, false otherwise.
+ */
+private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation, String type) {
 
-    /**
-     * Checks if a barrier placement is valid.
-     * 
-     * @param rowInit The initial row position of the barrier.
-     * @param columnInit The initial column position of the barrier.
-     * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
-     * @return true if the barrier placement is valid, false otherwise.
-     */
-    private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orientation,String type) {
-        int boardSize = board.getSize();
-    
-        // Verificar si las coordenadas están dentro de los límites del tablero
-        if (rowInit < 0 || rowInit >= boardSize || columnInit < 0 || columnInit >= boardSize) {
-            return false;
-        }
-    
-        // Verificar restricciones específicas para la orientación de la barrera
-        if (orientation.equals("H") && type!="Large") {
-            // Si la orientación es horizontal, verificar los límites de columna
-            if (columnInit == boardSize - 1 || columnInit == boardSize) {
-                return false; // Fuera de los límites
-            }
-        } else if (orientation.equals("V")) {
-            // Si la orientación es vertical, verificar los límites de fila
-            if (rowInit == boardSize - 1 || rowInit == boardSize) {
-                return false; // Fuera de los límites
-            }
-        } else if (orientation.equals("V")  && type=="Large") {
-            if (rowInit == boardSize - 1 || rowInit == boardSize || rowInit == boardSize-2)
-                return false;
-        }else if (orientation.equals("H")  && type=="Large") {
-            if (columnInit == boardSize - 1 || columnInit == boardSize || columnInit == boardSize-2)
-                return false;
-        }else {
-            // Orientación inválida
-            return false;
-        }
-    
-        // Verificar si hay barreras en las posiciones adyacentes
-        if (orientation.equals("H") && type!="Large") {
-            return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
-                   !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
-                   !board.getBox(rowInit , columnInit).hasBarrier("N") &&
-                   !board.getBox(rowInit , columnInit + 1).hasBarrier("N");
-            
-        } else if (orientation.equals("V") && type!="Large") {
-            return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
-                   !board.getBox(rowInit, columnInit).hasBarrier("W") &&
-                   !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
-                   !board.getBox(rowInit + 1, columnInit).hasBarrier("W");
-        }
-        if (orientation.equals("H") && type=="Large") {
-            return !board.getBox(rowInit-1, columnInit).hasBarrier("S") &&
-                   !board.getBox(rowInit-1, columnInit + 1).hasBarrier("S") &&
-                   !board.getBox(rowInit , columnInit).hasBarrier("N") &&
-                   !board.getBox(rowInit , columnInit + 1).hasBarrier("N") &&
-                   !board.getBox(rowInit-1 , columnInit+2).hasBarrier("N") &&
-                   !board.getBox(rowInit , columnInit + 2).hasBarrier("N");
-                   
-            
-        } else if (orientation.equals("V") && type=="Large") {
-            return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
-                   !board.getBox(rowInit, columnInit).hasBarrier("W") &&
-                   !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
-                   !board.getBox(rowInit + 1, columnInit).hasBarrier("W") &&
-                   !board.getBox(rowInit + 2, columnInit - 1).hasBarrier("E") &&
-                   !board.getBox(rowInit + 2, columnInit).hasBarrier("W") ;
+    if (!checkLimits(rowInit, columnInit, orientation, type)) {
+        return false;
+    }
+
+    // Check if there are barriers in adjacent positions
+    return checkBarriers(orientation, rowInit, columnInit, type);
+
+}
+
+/**
+ * Creates a barrier object based on the given type and orientation.
+ * 
+ * @param type The type of barrier.
+ * @param orientation The orientation of the barrier.
+ * @return The created barrier object.
+ */
+public barrier createBarrier(String type, String orientation) {
+    if (type.equals("Large")) {
+        return new large(true);
+    } else if (type.equals("Allied")) {
+        return new allied(getActualPlayer());
+    } else if (type.equals("Temporary")) {
+        return new temporary(getActualPlayer(), orientation);
+    } else {
+        return new barrier(true);
+    }
+}
+
+/**
+ * Sets a barrier on the board at the specified location and orientation.
+ * 
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param barrier The barrier object to place.
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @throws QuoripoobException If the orientation is invalid.
+ */
+public void setBarrier(int rowInit, int columnInit, barrier barrier, String orientation) throws QuoripoobException {
+
+    if (orientation.equals("H")) {
+        board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
+        board.getBox(rowInit, columnInit + 1).placeBarrier(barrier, "N");
+        board.getBox(rowInit - 1, columnInit).placeBarrier(barrier, "S");
+        board.getBox(rowInit - 1, columnInit + 1).placeBarrier(barrier, "S");
+        if (barrier instanceof large) {
+            board.getBox(rowInit, columnInit + 2).placeBarrier(barrier, "N");
+            board.getBox(rowInit - 1, columnInit + 2).placeBarrier(barrier, "S");
+        } else if (barrier instanceof temporary) {
+            ((temporary) barrier).updateBox(board.getBox(rowInit, columnInit), board.getBox(rowInit, columnInit + 1), board.getBox(rowInit - 1, columnInit), board.getBox(rowInit - 1, columnInit + 1));
         }
 
-        else{
-            return false;
+    } else if (orientation.equals("V")) {
+        board.getBox(rowInit, columnInit).placeBarrier(barrier, "W");
+        board.getBox(rowInit + 1, columnInit).placeBarrier(barrier, "W");
+        board.getBox(rowInit, columnInit - 1).placeBarrier(barrier, "E");
+        board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
+        if (barrier instanceof large) {
+            board.getBox(rowInit + 2, columnInit - 1).placeBarrier(barrier, "E");
+            board.getBox(rowInit + 2, columnInit - 1).placeBarrier(barrier, "W");
+        } else if (barrier instanceof temporary) {
+            ((temporary) barrier).updateBox(board.getBox(rowInit, columnInit), board.getBox(rowInit, columnInit + 1), board.getBox(rowInit - 1, columnInit), board.getBox(rowInit - 1, columnInit + 1));
+        }
+    } else {
+        throw new QuoripoobException("Invalid orientation");
+    }
+
+}
+
+
+/**
+ * Erases a barrier from the board at the specified location and orientation.
+ * 
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param barrier The barrier object to erase.
+ * @throws QuoripoobException If the barrier cannot be erased due to blocking a player's path.
+ */
+public void eraseBarrier(String orientation, int rowInit, int columnInit, barrier barrier) throws QuoripoobException {
+    if (orientation.equals("H")) {
+        board.getBox(rowInit, columnInit).eraseBarrier("N");
+        board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
+        board.getBox(rowInit - 1, columnInit).eraseBarrier("S");
+        board.getBox(rowInit - 1, columnInit + 1).eraseBarrier("S");
+        if (barrier instanceof large) {
+            board.getBox(rowInit, columnInit + 2).eraseBarrier("N");
+            board.getBox(rowInit - 1, columnInit + 2).eraseBarrier("S");
+        }
+    } else {
+        board.getBox(rowInit, columnInit).eraseBarrier("W");
+        board.getBox(rowInit + 1, columnInit).eraseBarrier("W");
+        board.getBox(rowInit, columnInit - 1).eraseBarrier("E");
+        board.getBox(rowInit + 1, columnInit - 1).eraseBarrier("E");
+        if (barrier instanceof large) {
+            board.getBox(rowInit + 2, columnInit - 1).eraseBarrier("E");
+            board.getBox(rowInit + 2, columnInit - 1).eraseBarrier("W");
         }
     }
-    
+    throw new QuoripoobException("The path blocks the player");
+}
+
+/**
+ * Checks if the specified position and orientation are within the board limits.
+ * 
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @param type The type of the barrier.
+ * @return true if the placement is within limits, false otherwise.
+ */
+public boolean checkLimits(int rowInit, int columnInit, String orientation, String type) {
+    int boardSize = board.getSize();
+    if (rowInit < 0 || rowInit >= boardSize || columnInit < 0 || columnInit >= boardSize) {
+        return false;
+    }
+    if ((orientation.equals("H") && type != "Large") || (orientation.equals("V") && type != "Large")) {
+        if (columnInit == boardSize - 1 || rowInit == boardSize - 1) {
+            return false;
+        }
+    } else if ((orientation.equals("H") && type == "Large") || (orientation.equals("V") && type == "Large")) {
+        if (columnInit == boardSize - 1 || rowInit == boardSize - 1 || rowInit == boardSize - 2 || columnInit == boardSize - 2) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Checks if there are barriers in adjacent positions.
+ * 
+ * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
+ * @param rowInit The initial row position of the barrier.
+ * @param columnInit The initial column position of the barrier.
+ * @param type The type of the barrier.
+ * @return true if there are no barriers in adjacent positions, false otherwise.
+ */
+public boolean checkBarriers(String orientation, int rowInit, int columnInit, String type) {
+    if (orientation.equals("H") && type != "Large") {
+        return !board.getBox(rowInit - 1, columnInit).hasBarrier("S") &&
+               !board.getBox(rowInit - 1, columnInit + 1).hasBarrier("S") &&
+               !board.getBox(rowInit, columnInit).hasBarrier("N") &&
+               !board.getBox(rowInit, columnInit + 1).hasBarrier("N");
+    } else if (orientation.equals("V") && type != "Large") {
+        return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
+               !board.getBox(rowInit, columnInit).hasBarrier("W") &&
+               !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
+               !board.getBox(rowInit + 1, columnInit).hasBarrier("W");
+    } else if (orientation.equals("H") && type == "Large") {
+        return !board.getBox(rowInit - 1, columnInit).hasBarrier("S") &&
+               !board.getBox(rowInit - 1, columnInit + 1).hasBarrier("S") &&
+               !board.getBox(rowInit, columnInit).hasBarrier("N") &&
+               !board.getBox(rowInit, columnInit + 1).hasBarrier("N") &&
+               !board.getBox(rowInit - 1, columnInit + 2).hasBarrier("S") &&
+               !board.getBox(rowInit, columnInit + 2).hasBarrier("N");
+    } else if (orientation.equals("V") && type == "Large") {
+        return !board.getBox(rowInit, columnInit - 1).hasBarrier("E") &&
+               !board.getBox(rowInit, columnInit).hasBarrier("W") &&
+               !board.getBox(rowInit + 1, columnInit - 1).hasBarrier("E") &&
+               !board.getBox(rowInit + 1, columnInit).hasBarrier("W") &&
+               !board.getBox(rowInit + 2, columnInit - 1).hasBarrier("E") &&
+               !board.getBox(rowInit + 2, columnInit).hasBarrier("W");
+    } else {
+        return false;
+    }
+}
 
     /**
      * Plays the machine's turn based on the selected difficulty level.
@@ -420,14 +678,13 @@ public class QuoridorGame implements Serializable {
         }
         else if(difficult.equals("intermediate")){
 
-            playIntermediate();
 
             }
         else{
             // Implement advanced difficulty level logic
         }
         
-        actualPlayer = (actualPlayer + 1) % players.length;
+        moveToNextPlayer();
     }
 
     /**
@@ -447,7 +704,7 @@ public class QuoridorGame implements Serializable {
 
             if (randomAction == 0) {
                 
-                String[] directions = {"N", "S", "E", "W", "NE", "NW", "SE", "SW"};
+                String[] directions = {"N", "S", "E", "W"};
                 String randomDirection = directions[random.nextInt(directions.length)];
                 try {
                     moveTab(randomDirection);
@@ -472,140 +729,7 @@ public class QuoridorGame implements Serializable {
     }
 
 
-
-    /**
-     * Checks if a barrier placement is valid.
-     * 
-     * @return true if the barrier placement is valid, false otherwise.
-     */
-    public boolean isValidBarrier(){
-        boolean isValid = false;
-        // Add logic to check barrier validity
-        return isValid;
-    }
-
-    /**
-     * Checks if a move to the specified position in the specified direction is valid.
-     * 
-     * @param newRow The new row position.
-     * @param newColumn The new column position.
-     * @param direction The direction of the move.
-     * @return true if the move is valid, false otherwise.
-     */
-    public boolean isValidMove(int newRow, int newColumn, String direction) throws QuoripoobException{
-
-        boolean isValid = true;
-
-         
-        box newBox = board.getBox(newRow, newColumn);
-
-        if(direction.equals("S") || direction.equals("E") || direction.equals("N") || direction.equals("W")){
-            boolean comprobe = checkOrthogonalMovements(direction, newBox);
-
-            if(comprobe){
-                isValid = false;
-            }
-        }
-        else{
-            boolean comprobe = checkDiagonalMovements(direction, newBox);
-            if(!comprobe){
-                isValid = false;
-            }
-        }
-        
-        
-        return isValid;
-    }
-
-    /**
-     * Checks if there are barriers obstructing the orthogonal movements.
-     * 
-     * @param direction The direction of movement.
-     * @param newBox The box to move to.
-     * @return true if there is a barrier obstructing the movement, false otherwise.
-     */
-    private boolean checkOrthogonalMovements(String direction, box newBox){
-        boolean comprobe = false;
-        if(direction.equals("S")){
-            comprobe = newBox.thereIsABarrier("S");
-            if (comprobe && newBox.getBarrier("S") instanceof allied){
-                allied barrier = (allied) newBox.getBarrier("S");
-                if(barrier.getOwner()==getActualPlayer()){
-                    comprobe=false;
-                }
-            };
-        }
-        else if(direction.equals("N")){
-            comprobe = newBox.thereIsABarrier("N");
-            comprobe = newBox.thereIsABarrier("N");
-            if (comprobe && newBox.getBarrier("N") instanceof allied){
-                allied barrier = (allied) newBox.getBarrier("N");
-                if(barrier.getOwner()==getActualPlayer()){
-                    comprobe=false;
-                }
-            };
-        }
-        else if(direction.equals("E")){
-            comprobe = newBox.thereIsABarrier("E");
-            comprobe = newBox.thereIsABarrier("E");
-            if (comprobe && newBox.getBarrier("E") instanceof allied){
-                allied barrier = (allied) newBox.getBarrier("E");
-                if(barrier.getOwner()==getActualPlayer()){
-                    comprobe=false;
-                }
-            };
-        }
-        else{
-            comprobe = newBox.thereIsABarrier("W");
-            comprobe = newBox.thereIsABarrier("W");
-            if (comprobe && newBox.getBarrier("W") instanceof allied){
-                allied barrier = (allied) newBox.getBarrier("W");
-                if(barrier.getOwner()==getActualPlayer()){
-                    comprobe=false;
-                }
-            };
-        }
-        return comprobe;
-    }
-
-    /**
-     * Checks if there are barriers obstructing the diagonal movements.
-     * 
-     * @param direction The direction of movement.
-     * @param newBox The box to move to.
-     * @return true if there is a barrier obstructing the movement, false otherwise.
-     */
-    private boolean checkDiagonalMovements(String direction, box currentBox) throws QuoripoobException {
-        boolean isPossible = false;
-    
-        int[] orthogonalPosition = new int[2];
-        orthogonalPosition[0] = currentBox.getRow();
-        orthogonalPosition[1] = currentBox.getColumn();
-    
-        char firstDirection = direction.charAt(0);
-        char secondDirection = direction.charAt(1);
-    
-        orthogonalPosition = obtainNewPosition(String.valueOf(firstDirection), orthogonalPosition);
-    
-        // Verificar si hay un jugador adyacente y una barrera que impida el salto
-        if (comprobePlayer(orthogonalPosition[0], orthogonalPosition[1])) {
-            box adjacentBox = board.getBox(orthogonalPosition[0], orthogonalPosition[1]);
-            if (checkOrthogonalMovements(String.valueOf(firstDirection), adjacentBox)) {
-                isPossible = true;
-            }
-        }
-
-        if (comprobePlayer(orthogonalPosition[0], orthogonalPosition[1])) {
-            box adjacentBox = board.getBox(orthogonalPosition[0], orthogonalPosition[1]);
-            if (checkOrthogonalMovements(String.valueOf(secondDirection), adjacentBox)) {
-                isPossible = true;
-            }
-        }
-    
-        return isPossible;
-    }
-    
-    
+   
     /**
      * Checks if a player has won the game.
      */
@@ -629,23 +753,7 @@ public class QuoridorGame implements Serializable {
         endGame("Give up");
     }
 
-    /**
-     * Checks if a player is present at the specified row and column position.
-     * 
-     * @param row The row position to check.
-     * @param column The column position to check.
-     * @return true if a player is present at the specified position, false otherwise.
-     */
-    public boolean comprobePlayer(int row, int column){
-        boolean comprobe = false;
-        int indexOtherPlayer = (actualPlayer + 1) % players.length;
-        playerTab otherPlayer = players[indexOtherPlayer];
-        box boxOther = otherPlayer.getCurrentBox();
-        if(boxOther.getColumn() == column && boxOther.getRow() == row){
-            comprobe = true;
-        }
-        return comprobe;
-    }
+
 
     /**
      * Ends the game with the specified cause.
@@ -654,7 +762,7 @@ public class QuoridorGame implements Serializable {
      */
     public void endGame(String cause){
         JOptionPane.showMessageDialog(null, "Game over. Thanks for playing!");
-    }
+        System.exit(0);    }
 
     /**
      * Retrieves the array of players.
@@ -674,61 +782,109 @@ public class QuoridorGame implements Serializable {
         return board;
     }
 
-    public playerTab getActualPlayer(){ 
+    public playerTab getActualPlayer() { 
         return players[actualPlayer];
     }
-
-    public boolean canPlayerWin() throws QuoripoobException {
-        playerTab currentPlayer = players[actualPlayer];
+    
+    /**
+     * Checks if the current player can win the game.
+     * 
+     * @param currentPlayer The player whose turn it is.
+     * @return true if the player can win, false otherwise.
+     * @throws QuoripoobException If an error occurs during the check.
+     */
+    public boolean canPlayerWin(playerTab currentPlayer) throws QuoripoobException {
         Set<box> visited = new HashSet<>();
         Queue<box> queue = new ArrayDeque<>();
-        
-        // Añadir la posición inicial del jugador a la cola y marcarla como visitada
+        Map<box, box> predecessors = new HashMap<>();
+    
+        // Add the player's initial position to the queue and mark it as visited
         queue.offer(currentPlayer.getCurrentBox());
         visited.add(currentPlayer.getCurrentBox());
-        
+        predecessors.put(currentPlayer.getCurrentBox(), null);  // No predecessor
+    
         while (!queue.isEmpty()) {
             box currentBox = queue.poll();
             int row = currentBox.getRow();
             int col = currentBox.getColumn();
-            
-            // Verificar si el jugador ha alcanzado su fila de victoria
+    
+            // Check if the player has reached their winning row
             if (row == currentPlayer.getWinningRow()) {
                 return true;
             }
-            
-            // Expandir las casillas vecinas no visitadas
+    
+            // Expand to unvisited neighboring cells
             for (int[] dir : DIRECTIONS) {
                 int newRow = row + dir[0];
                 int newCol = col + dir[1];
                 String movement;
-                
+    
+                // Determine the direction of movement
                 if (dir[0] == -1 && dir[1] == 0) {
-                    movement = "N";
-                } else if (dir[0] == 0 && dir[1] == -1) {
-                    movement = "W";
-                } else if (dir[0] == 1 && dir[1] == 0) {
                     movement = "S";
-                } else {
+                } else if (dir[0] == 0 && dir[1] == -1) {
                     movement = "E";
+                } else if (dir[0] == 1 && dir[1] == 0) {
+                    movement = "N";
+                } else if (dir[0] == 0 && dir[1] == 1) {
+                    movement = "W";
+                } else {
+                    continue; // Ignore diagonal or invalid movements
                 }
     
-                // Verificar si la nueva posición está dentro del tablero y no ha sido visitada
+                // Check if the new position is within the board and unvisited
                 if (newRow >= 0 && newRow < board.getSize() && newCol >= 0 && newCol < board.getSize() &&
-                    !visited.contains(board.getBox(newRow, newCol)) && isValidMove(newRow, newCol, movement)) {
+                    !visited.contains(board.getBox(newRow, newCol)) && isValidMove(newRow, newCol, movement, currentPlayer.isStar())) {
                     
-                    queue.offer(board.getBox(newRow, newCol));
-                    visited.add(board.getBox(newRow, newCol));
+                    box newBox = board.getBox(newRow, newCol);
+                    queue.offer(newBox);
+                    visited.add(newBox);
+                    predecessors.put(newBox, currentBox);  // Record predecessor
                 }
             }
         }
-        
-        // El jugador no puede ganar si no alcanza su fila de victoria
+    
+        // The player cannot win if they do not reach their winning row
         return false;
     }
     
-
     /**
+     * Distributes special boxes randomly on the board.
+     * 
+     * @param cantGoBack The number of goBack special boxes.
+     * @param cantDoubleShift The number of doubleShift special boxes.
+     * @param cantTeleporter The number of teleporter special boxes.
+     * @param cantStar The number of star special boxes.
+     */
+    public void distributeSpecialBoxes(int cantGoBack, int cantDoubleShift, int cantTeleporter, int cantStar) {
+        Random random = new Random();
+    
+        for (int i = 0; i < cantGoBack; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new goBack(fila, columna));
+        }
+    
+        for (int i = 0; i < cantDoubleShift; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new doubleShift(fila, columna));
+        }
+    
+        for (int i = 0; i < cantTeleporter; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new teleporter(fila, columna));
+        }
+    
+        for (int i = 0; i < cantStar; i++) {
+            int fila = random.nextInt(board.getSize() - 2) + 1; 
+            int columna = random.nextInt(board.getSize());
+            board.setSpecialBox(new star(fila, columna));
+        }
+    }
+    
+        /**
      * Saves the current state of the game to a file.
      * 
      * @param file The file to which the game state will be saved.
@@ -812,196 +968,4 @@ public class QuoridorGame implements Serializable {
         }
     }
 
-    private int[][] createGraph() {
-        int size = board.getSize();
-        int[][] graph = new int[size * size][size * size];
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                int current = i * size + j;
-                box currentBox = board.getBox(i, j);
-                if (!currentBox.hasBarrier("N") && i > 0) {
-                    int neighbor = (i - 1) * size + j;
-                    graph[current][neighbor] = 1;
-                }
-                if (!currentBox.hasBarrier("S") && i < size - 1) {
-                    int neighbor = (i + 1) * size + j;
-                    graph[current][neighbor] = 1;
-                }
-                if (!currentBox.hasBarrier("W") && j > 0) {
-                    int neighbor = i * size + (j - 1);
-                    graph[current][neighbor] = 1;
-                }
-                if (!currentBox.hasBarrier("E") && j < size - 1) {
-                    int neighbor = i * size + (j + 1);
-                    graph[current][neighbor] = 1;
-                }
-            }
-        }
-
-        return graph;
-    }
-
-    private Map<Integer, Integer> dijkstra(int[][] graph, int source) {
-        int size = graph.length;
-        int[] dist = new int[size];
-        int[] prev = new int[size];
-        boolean[] visited = new boolean[size];
-        Arrays.fill(dist, Integer.MAX_VALUE);
-        Arrays.fill(prev, -1);
-        dist[source] = 0;
-
-        for (int i = 0; i < size; i++) {
-            int u = minDistance(dist, visited);
-            if (u == -1) break;
-            visited[u] = true;
-
-            for (int v = 0; v < size; v++) {
-                if (!visited[v] && graph[u][v] != 0 && dist[u] != Integer.MAX_VALUE && dist[u] + graph[u][v] < dist[v]) {
-                    dist[v] = dist[u] + graph[u][v];
-                    prev[v] = u;
-                }
-            }
-        }
-
-        Map<Integer, Integer> path = new HashMap<>();
-        for (int i = 0; i < size; i++) {
-            path.put(i, prev[i]);
-        }
-
-        return path;
-    }
-
-    private int minDistance(int[] dist, boolean[] visited) {
-        int min = Integer.MAX_VALUE, minIndex = -1;
-
-        for (int v = 0; v < dist.length; v++) {
-            if (!visited[v] && dist[v] <= min) {
-                min = dist[v];
-                minIndex = v;
-            }
-        }
-
-        return minIndex;
-    }
-
-    public void playIntermediate() throws QuoripoobException {
-        if (!vsMachine) {
-            throw new QuoripoobException("This method can only be called when playing against the machine.");
-        }
-
-        if (actualPlayer == 1) {
-            playerTab machine = players[1];
-            playerTab human = players[0];
-            int[][] graph = createGraph();
-
-            int machinePosition = machine.getCurrentBox().getRow() * board.getSize() + machine.getCurrentBox().getColumn();
-            int humanPosition = human.getCurrentBox().getRow() * board.getSize() + human.getCurrentBox().getColumn();
-
-            Set<Integer> machineTargets = new HashSet<>();
-            for (int col = 0; col < board.getSize(); col++) {
-                machineTargets.add((board.getSize() - 1) * board.getSize() + col);
-            }
-
-            Set<Integer> humanTargets = new HashSet<>();
-            for (int col = 0; col < board.getSize(); col++) {
-                humanTargets.add(col);
-            }
-
-            Map<Integer, Integer> machinePath = dijkstra(graph, machinePosition);
-            Map<Integer, Integer> humanPath = dijkstra(graph, humanPosition);
-
-            int machineDistance = findShortestPathDistance(machinePath, machinePosition, machineTargets);
-            int humanDistance = findShortestPathDistance(humanPath, humanPosition, humanTargets);
-
-            if (machineDistance < humanDistance) {
-                int nextPosition = findNextPosition(machinePath, machinePosition, machineTargets);
-                int[] newPosition = {nextPosition / board.getSize(), nextPosition % board.getSize()};
-                int[] currentPosition = {machine.getCurrentBox().getRow(), machine.getCurrentBox().getColumn()};
-                String direction = determineDirection(currentPosition, newPosition);
-                moveTab(direction);
-            } else {
-                int row = new Random().nextInt(board.getSize());
-                int col = new Random().nextInt(board.getSize());
-                String orientation = new Random().nextBoolean() ? "H" : "V";
-                try {
-                    putBarrier(row, col, orientation,"Normal");
-                } catch (QuoripoobException e) {
-                    playIntermediate();
-                }
-            }
-        }
-    }
-
-    private int findShortestPathDistance(Map<Integer, Integer> path, int start, Set<Integer> targets) {
-        int minDistance = Integer.MAX_VALUE;
-        for (int target : targets) {
-            int distance = 0;
-            for (int at = target; at != -1; at = path.get(at)) {
-                distance++;
-                if (at == start) break;
-            }
-            minDistance = Math.min(minDistance, distance);
-        }
-        return minDistance;
-    }
-
-    private int findNextPosition(Map<Integer, Integer> path, int start, Set<Integer> targets) {
-        int minDistance = Integer.MAX_VALUE;
-        int nextPosition = start;
-        for (int target : targets) {
-            int distance = 0;
-            int at;
-            for (at = target; at != -1; at = path.get(at)) {
-                if (path.get(at) == start) {
-                    nextPosition = at;
-                    break;
-                }
-                distance++;
-            }
-            if (distance < minDistance) {
-                minDistance = distance;
-                nextPosition = at;
-            }
-        }
-        return nextPosition;
-    }
-
-    private String determineDirection(int[] currentPosition, int[] newPosition) {
-        int dRow = newPosition[0] - currentPosition[0];
-        int dCol = newPosition[1] - currentPosition[1];
-
-        if (dRow == -1 && dCol == 0) return "N";
-        if (dRow == 1 && dCol == 0) return "S";
-        if (dRow == 0 && dCol == 1) return "E";
-        if (dRow == 0 && dCol == -1) return "W";
-        if (dRow == -1 && dCol == 1) return "NE";
-        if (dRow == -1 && dCol == -1) return "NW";
-        if (dRow == 1 && dCol == 1) return "SE";
-        if (dRow == 1 && dCol == -1) return "SW";
-
-        return null;
-    }
-
-    public void distributeSpecialBoxes( int cantGoBack, int cantDoubleShift, int cantTeleporter) {
-        Random random = new Random();
-    
-        for (int i = 0; i < cantGoBack; i++) {
-            int fila = random.nextInt(board.getSize() - 2) + 1; 
-            int columna = random.nextInt(board.getSize());
-            board.setSpecialBox(new goBack(fila, columna));
-        }
-    
-        for (int i = 0; i < cantDoubleShift; i++) {
-            int fila = random.nextInt(board.getSize() - 2) + 1; 
-            int columna = random.nextInt(board.getSize());
-            board.setSpecialBox(new doubleShift(fila, columna));
-        }
-    
-        for (int i = 0; i < cantTeleporter; i++) {
-            int fila = random.nextInt(board.getSize() - 2) + 1; 
-            int columna = random.nextInt(board.getSize());
-            board.setSpecialBox(new teleporter(fila, columna));
-        }
-    }
 }

@@ -51,14 +51,13 @@ public class QuoridorGUI extends JFrame {
     
 
     private JPanel choseSpecials;
-    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField;
+    private JTextField normalBarriersField,temporaryBarriersField,longBarriersField, alliedBarriersField,totalSpecialTilesField,boardSizeJField;
     private ArrayList<JCheckBox> specialTileCheckBoxes;
     private ArrayList<JTextField> specialTileQuantityFields;
     private JButton submitButton;
-    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLongLabel;
-    private JTextField teleporterField;
-    private JTextField goBackField;
-    private JTextField doubleShiftField;
+    private JLabel amountNormalLabel, amountAlliedLabel, amountTemporaryLabel, amountLongLabel,boardSize;
+    private JTextField doubleShiftField,starField,goBackField,teleporterField;
+    int normalBarriers,temporaryBarriers,longBarriers, alliedBarriers, totalSpecialTiles,size,goBack,doubleShift,teleporter,star;
  
     private JPanel gameBoardPanel, QuoridorBoard, principalGBL, player2Panel, player1Panel;
     private JLabel player1Label, player2Label,barrierTypeLabel;
@@ -128,7 +127,8 @@ public class QuoridorGUI extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
     
         int row = 0;
-    
+        
+        addLabeledField(choseSpecials, gbc, row++, "Board Size", boardSizeJField= new JTextField() );
         addLabeledField(choseSpecials, gbc, row++, "Normal Barriers:", normalBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Allied Barriers:", alliedBarriersField = new JTextField());
         addLabeledField(choseSpecials, gbc, row++, "Temporary Barriers:", temporaryBarriersField = new JTextField());
@@ -138,8 +138,8 @@ public class QuoridorGUI extends JFrame {
         specialTileCheckBoxes = new ArrayList<>();
         specialTileQuantityFields = new ArrayList<>();
     
-        String[] tileTypes = {"Teleporter", "Go Back", "Double Shift"};
-        JTextField[] fields = {teleporterField = new JTextField(), goBackField = new JTextField(), doubleShiftField = new JTextField()};
+        String[] tileTypes = {"Teleporter", "Go Back", "Double Shift","Star"};
+        JTextField[] fields = {teleporterField = new JTextField(), goBackField = new JTextField(), doubleShiftField = new JTextField(),starField= new JTextField()};
     
         for (int i = 0; i < tileTypes.length; i++) {
             JCheckBox checkBox = new JCheckBox(tileTypes[i]);
@@ -416,8 +416,8 @@ public class QuoridorGUI extends JFrame {
         actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.X_AXIS));
         actionPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar en el eje X
 
-        JButton placeButton = new JButton("Colocar");
-        JButton moveButton = new JButton("Mover");
+        JButton placeButton = new JButton("Put");
+        JButton moveButton = new JButton("Move");
 
         actionPanel.add(Box.createHorizontalGlue()); // Pegamento horizontal para empujar los botones al centro
         actionPanel.add(placeButton);
@@ -891,7 +891,7 @@ private void optionSave() {
 
         Quoripoob.setMode(mode);
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "setPlayers");
+                cl.show(principal, "choseSpecials");
 
     }
 
@@ -905,11 +905,15 @@ private void optionSave() {
                 
                 namePlayer1=name1.getText().trim();
                 namePlayer2=name2.getText().trim();
+                Quoripoob.setBoard(size);
                 Quoripoob.setPlayers(0, player1Name, player1Color);
                 Quoripoob.setPlayers(1, player2Name, player2Color);
+                Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter,star);
+                Quoripoob.setBarriers(normalBarriers, alliedBarriers, temporaryBarriers, longBarriers);
+
+                JOptionPane.showMessageDialog(this, "Configuration set successfully!");
                 
-                CardLayout cl = (CardLayout) principal.getLayout();
-                    cl.show(principal, "choseSpecials");
+                showGameBoardScreen();
                 
             } else {
                 player1Ready=false;
@@ -921,11 +925,11 @@ private void optionSave() {
 
     private void submitConfiguration() {
         try {
-            int normalBarriers = Integer.parseInt(normalBarriersField.getText());
-            int temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
-            int longBarriers = Integer.parseInt(longBarriersField.getText());
-            int alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
-            int totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
+            normalBarriers = Integer.parseInt(normalBarriersField.getText());
+            temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
+            longBarriers = Integer.parseInt(longBarriersField.getText());
+            alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
+            totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
 
 
             int sumOfSpecialTiles = 0;
@@ -938,19 +942,25 @@ private void optionSave() {
                 }
             }
 
-            Quoripoob.setBarriers(normalBarriers, alliedBarriers, temporaryBarriers, longBarriers);
-
-            int goBack=Integer.parseInt(goBackField.getText());
-            int doubleShift=Integer.parseInt(doubleShiftField.getText());
-            int teleporter= Integer.parseInt(teleporterField.getText());
+            size = Integer.parseInt(boardSizeJField.getText());
+            goBack=Integer.parseInt(goBackField.getText());
+            doubleShift=Integer.parseInt(doubleShiftField.getText());
+            teleporter= Integer.parseInt(teleporterField.getText());
+            star= Integer.parseInt(starField.getText());
+            
         
-            Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter);
 
             if (sumOfSpecialTiles != totalSpecialTiles) {
                 JOptionPane.showMessageDialog(this, "The total quantity of special tiles does not match the specified total.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Configuration set successfully!");
-                showGameBoardScreen();
+            }
+            else if(star>(totalSpecialTiles*0.2)){
+                JOptionPane.showMessageDialog(this, "The total of stars cant be 20% than totally specials.");
+            }
+            else {
+
+
+                CardLayout cl = (CardLayout) principal.getLayout();
+                    cl.show(principal, "setPlayers");
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for all barriers and special tiles.");
