@@ -6,7 +6,9 @@ import java.awt.Color;
  * The doubleShift class represents a special type of box in the Quoridor game board.
  * This type of box is indicated by a yellow color.
  */
-public class doubleShift extends box {
+public class doubleShift extends box   {
+
+    private static final long serialVersionUID = 1L; 
 
     /**
      * Constructs a doubleShift box with the specified row and column.

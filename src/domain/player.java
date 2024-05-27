@@ -7,7 +7,7 @@ import java.awt.Color;
  * This class inherits from the playerTab class.
  */
 public class player extends playerTab {
-
+    private static final long serialVersionUID = 1L; 
     /**
      * Constructs a player with the specified attributes.
      * 

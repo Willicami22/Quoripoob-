@@ -1,7 +1,10 @@
 package domain;
 
-public class QuoripoobException extends Exception {
+import java.io.Serializable;
 
+public class QuoripoobException extends Exception implements Serializable {
+
+    private static final long serialVersionUID = 1L; 
     public static final String OutOfIndex="Invalid player index.";
     public static final String OutOfBoard="The position out of the bord.";
     public static final String InvalidMove="Invalid Move.";
@@ -10,7 +13,7 @@ public class QuoripoobException extends Exception {
     public static final String InvalidPlaceBarrier="Invalid barrier placement";
     public static final String DontHaveBarriers="You don't have more barriers of this type.";
     public static final String PathBlocked="The path blocks the player";
-    
+
 
 
 

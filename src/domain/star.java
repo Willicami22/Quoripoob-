@@ -6,6 +6,8 @@ package domain;
  */
 public class star extends box {
 
+    private static final long serialVersionUID = 1L; 
+
     /**
      * Constructs a star box with the specified row and column.
      * 

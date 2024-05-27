@@ -8,6 +8,8 @@ import java.awt.Color;
  */
 public class large extends barrier {
 
+    private static final long serialVersionUID = 1L; 
+
     /**
      * Constructs a large barrier with the specified orientation.
      * 

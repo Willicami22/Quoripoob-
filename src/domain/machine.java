@@ -8,7 +8,7 @@ import java.awt.Color;
  */
 public class machine extends playerTab {
     private String difficult; // The difficulty level of the computer-controlled player.
-
+    private static final long serialVersionUID = 1L; 
     /**
      * Constructs a machine player with the specified attributes.
      * 

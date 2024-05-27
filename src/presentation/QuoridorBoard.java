@@ -97,4 +97,9 @@ public class QuoridorBoard extends JPanel {
             g.drawString(String.valueOf(j + 1), x, 15);
         }
     }
+
+    public void updateBoard(QuoridorGame newGame) {
+        this.game = newGame;
+        repaint();
+    }
 }

@@ -6,6 +6,7 @@ package domain;
  */
 public class temporary extends barrier {
 
+    private static final long serialVersionUID = 1L; 
     private playerTab owner; // The player who owns the temporary barrier.
     private int turn; // The number of turns the temporary barrier has been active.
     private box[] boxes; // The array of boxes affected by the temporary barrier.

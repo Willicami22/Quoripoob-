@@ -833,18 +833,43 @@ public class QuoridorGUI extends JFrame {
             File selectedFile = fileChooser.getSelectedFile();
             try {
                 // Cargar el estado del juego desde el archivo
-                Quoripoob = QuoridorGame.open(selectedFile);
+                QuoridorGame loadedGame = QuoridorGame.open(selectedFile);
+    
+                // Validar el juego cargado
+                if (loadedGame == null || loadedGame.getBoard() == null) {
+                    throw new QuoripoobException("El archivo no contiene un estado de juego válido.");
+                }
+    
+                // Asignar el juego cargado a la variable global de juego
+                Quoripoob = loadedGame;
+    
+                // Actualizar la instancia de QuoridorBoard con el nuevo juego
+                QuoridorBoard board= (QuoridorBoard) QuoridorBoard;
+                board.updateBoard(loadedGame);
+    
+                // Actualizar los nombres y colores de los jugadores
+                player1Label.setText(Quoripoob.getPlayers()[0].getName());
+                player2Label.setText(Quoripoob.getPlayers()[1].getName());
+                selectedColorButton1.setBackground(Quoripoob.getPlayers()[0].getColor());
+                selectedColorButton2.setBackground(Quoripoob.getPlayers()[1].getColor());
     
                 // Cambiar al panel de juego (gameBoard)
                 CardLayout cl = (CardLayout) (principal.getLayout());
                 cl.show(principal, "gameBoard");
     
+                // Refrescar el panel de juego
+                gameBoardPanel.revalidate();
+                gameBoardPanel.repaint();
+                
             } catch (QuoripoobException ex) {
                 Log.record(ex);
                 JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al abrir el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+    
+
+
 
 private void optionSave() {
     JFileChooser fileChooser = new JFileChooser();
@@ -899,33 +924,56 @@ private void optionSave() {
 
     }
 
-
     private void checkReady() {
         if (player1Ready && player2Ready) {
             String player1Name = name1.getText().trim();
             String player2Name = name2.getText().trim();
-            
-            if (!player1Name.isEmpty() && !player2Name.isEmpty() && player1Color != null && player2Color != null) {
-                
-                namePlayer1=name1.getText().trim();
-                namePlayer2=name2.getText().trim();
-                Quoripoob.setBoard(size);
-                Quoripoob.setPlayers(0, player1Name, player1Color);
-                Quoripoob.setPlayers(1, player2Name, player2Color);
-                Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter,star);
-                Quoripoob.setBarriers(normalBarriers, alliedBarriers, temporaryBarriers, longBarriers);
-
-                JOptionPane.showMessageDialog(this, "Configuration set successfully!");
-                
-                showGameBoardScreen();
-                
-            } else {
-                player1Ready=false;
-                player2Ready=false;
-                JOptionPane.showMessageDialog(this, "Por favor ingresa nombres y selecciona colores para ambos jugadores.", "Error", JOptionPane.ERROR_MESSAGE);
+    
+            // Check if names are empty or identical
+            if (player1Name.isEmpty() || player2Name.isEmpty()) {
+                player1Ready = false;
+                player2Ready = false;
+                JOptionPane.showMessageDialog(this, "Please enter names for both players.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+    
+            if (player1Name.equals(player2Name)) {
+                player1Ready = false;
+                player2Ready = false;
+                JOptionPane.showMessageDialog(this, "Player names cannot be identical.", "Error",   JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+    
+            // Check if colors are selected or identical
+            if (player1Color == null || player2Color == null) {
+                player1Ready = false;
+                player2Ready = false;
+                JOptionPane.showMessageDialog(this, "Please select colors for both players.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+    
+            if (player1Color.equals(player2Color)) {
+                player1Ready = false;
+                player2Ready = false;
+                JOptionPane.showMessageDialog(this, "Player colors cannot be identical.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+    
+            // If everything is correct, configure the game
+            namePlayer1 = player1Name;
+            namePlayer2 = player2Name;
+            Quoripoob.setBoard(size);
+            Quoripoob.setPlayers(0, player1Name, player1Color);
+            Quoripoob.setPlayers(1, player2Name, player2Color);
+            Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter, star);
+            Quoripoob.setBarriers(normalBarriers, alliedBarriers, temporaryBarriers, longBarriers);
+    
+            JOptionPane.showMessageDialog(this, "Configuration set successfully!");
+    
+            showGameBoardScreen();
         }
     }
+    
 
     private void submitConfiguration() {
         try {

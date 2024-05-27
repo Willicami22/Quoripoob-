@@ -8,6 +8,8 @@ import java.awt.Color;
  */
 public class goBack extends box {
 
+    private static final long serialVersionUID = 1L; 
+
     /**
      * Constructs a goBack box with the specified row and column.
      * 

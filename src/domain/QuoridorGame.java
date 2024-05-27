@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.*;
 import java.io.*;
 import javax.swing.JOptionPane;
-import presentation.QuoridorGUI;
 
 /**
  * The QuoridorGame class represents the main game logic of the Quoridor game.
@@ -615,12 +614,21 @@ private boolean checkLimits(int rowInit, int columnInit, String orientation, Str
     if (rowInit < 0 || rowInit >= boardSize || columnInit < 0 || columnInit >= boardSize) {
         return false;
     }
-    if ((orientation.equals("H") && type != "Large") || (orientation.equals("V") && type != "Large")) {
-        if (columnInit == boardSize - 1 || rowInit == boardSize - 1) {
+
+    if (orientation.equals("H") && !type.equals("Large")) {
+        if (columnInit >= boardSize - 1 || rowInit == 0) {
             return false;
         }
-    } else if ((orientation.equals("H") && type == "Large") || (orientation.equals("V") && type == "Large")) {
-        if (columnInit == boardSize - 1 || rowInit == boardSize - 1 || rowInit == boardSize - 2 || columnInit == boardSize - 2) {
+    } else if (orientation.equals("V") && !type.equals("Large")) {
+        if (rowInit >= boardSize - 1 || columnInit == 0) {
+            return false;
+        }
+    } else if (orientation.equals("H") && type.equals("Large")) {
+        if (columnInit >= boardSize - 2 || rowInit == 0) {
+            return false;
+        }
+    } else if (orientation.equals("V") && type.equals("Large")) {
+        if (rowInit >= boardSize - 2 || columnInit == 0) {
             return false;
         }
     } else {
@@ -697,14 +705,14 @@ private boolean checkBarriers(String orientation, int rowInit, int columnInit, S
         if (!vsMachine) {
             throw new QuoripoobException("This method can only be called when playing against the machine.");
         }
-
+    
         if (actualPlayer == 1) {
             Random random = new Random();
-
+    
             int randomAction = random.nextInt(2);
-
+    
             if (randomAction == 0) {
-                
+                // Move the player
                 String[] directions = {"N", "S", "E", "W"};
                 String randomDirection = directions[random.nextInt(directions.length)];
                 try {
@@ -714,14 +722,18 @@ private boolean checkBarriers(String orientation, int rowInit, int columnInit, S
                     playBeginner();
                 }
             } else {
-                
+                // Place a barrier
                 int row = random.nextInt(board.getSize());
                 int col = random.nextInt(board.getSize());
                 String orientation = random.nextBoolean() ? "H" : "V";
+    
+                // Choose a random type of barrier
+                String[] barrierTypes = {"Normal", "Large", "Allied", "Temporary"};
+                String barrierType = barrierTypes[random.nextInt(barrierTypes.length)];
+    
                 try {
-                    putBarrier(row, col, orientation,"Normal");
+                    putBarrier(row, col, orientation, barrierType);
                 } catch (QuoripoobException e) {
-                    
                     Log.record(e);
                     playBeginner();
                 }
@@ -902,7 +914,7 @@ private boolean checkBarriers(String orientation, int rowInit, int columnInit, S
             throw new QuoripoobException("Error al guardar la partida: " + e.getMessage());
         }
     }
-    
+
 
 
     /**

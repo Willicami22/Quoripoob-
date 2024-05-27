@@ -1,10 +1,12 @@
 package domain;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-public class colorsPalette {
+public class colorsPalette implements Serializable{
+    private static final long serialVersionUID = 1L; 
     public static final Color PASTEL_PINK = new Color(255, 182, 193);
     public static final Color PASTEL_BLUE = new Color(173, 216, 230);
     public static final Color PASTEL_GREEN = new Color(152, 251, 152);

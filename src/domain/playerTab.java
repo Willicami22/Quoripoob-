@@ -23,6 +23,7 @@ public class playerTab implements Serializable {
     private ArrayList<String> directions; // The list of directions in which the player moves.
     private boolean star; // Indicates if the player is in star mode.
     private int numStar; // The number of turns the player has been in star mode.
+    
 
     /**
      * Constructs a player with the specified initial position, color, name, and winning row.

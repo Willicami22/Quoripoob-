@@ -1,6 +1,7 @@
 package domain;    
 
 import java.util.logging.Logger;
+import java.io.Serializable;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.Level;
@@ -8,8 +9,9 @@ import java.util.logging.Level;
 /**
  * 
  */
-public class Log{
+public class Log implements Serializable{
     public static String name="QuoridorGame";
+    private static final long serialVersionUID = 1L; 
     
     public static void record(Exception e){
         try{
