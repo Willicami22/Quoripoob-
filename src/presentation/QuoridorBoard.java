@@ -19,24 +19,24 @@ public class QuoridorBoard extends JPanel {
         drawBoard(g);
         drawPlayers(g);
         drawBarriers(g);
+        drawCoordinates(g);
     }
 
     private void drawBoard(Graphics g) {
         int boxSize = getWidth() / game.getBoard().getSize();
-        box[][] boxes= game.getBoard().getBoxes();
-        for (box[] i: boxes) {
-            for (box j: i) {
+        box[][] boxes = game.getBoard().getBoxes();
+        for (box[] i : boxes) {
+            for (box j : i) {
                 int x = j.getColumn() * boxSize;
                 int y = j.getRow() * boxSize;
 
-                g.setColor(j.getColor()); 
+                g.setColor(j.getColor());
                 g.fillRect(x, y, boxSize, boxSize);
-                g.setColor(Color.BLACK); 
+                g.setColor(Color.BLACK);
                 g.drawRect(x, y, boxSize, boxSize);
-                }
             }
         }
-    
+    }
 
     private void drawPlayers(Graphics g) {
         int boxSize = getWidth() / game.getBoard().getSize();
@@ -45,8 +45,8 @@ public class QuoridorBoard extends JPanel {
             int x = position.getColumn() * boxSize + boxSize / 4;
             int y = position.getRow() * boxSize + boxSize / 4;
             int size = boxSize / 2;
-            g.setColor(player.getColor()); 
-            g.fillOval(x, y, size, size); 
+            g.setColor(player.getColor());
+            g.fillOval(x, y, size, size);
         }
     }
 
@@ -57,7 +57,7 @@ public class QuoridorBoard extends JPanel {
                 box currentBox = game.getBoard().getBox(i, j);
                 int x = j * boxSize;
                 int y = i * boxSize;
-                
+
                 g.setColor(Color.YELLOW);
 
                 if (currentBox.hasBarrier("N")) {
@@ -80,6 +80,21 @@ public class QuoridorBoard extends JPanel {
         }
     }
 
+    private void drawCoordinates(Graphics g) {
+        int boxSize = getWidth() / game.getBoard().getSize();
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        // Draw row numbers on the left side
+        for (int i = 0; i < game.getBoard().getSize(); i++) {
+            int y = i * boxSize + boxSize / 2;
+            g.drawString(String.valueOf(i + 1), 5, y);
+        }
+
+        // Draw column numbers on the top side
+        for (int j = 0; j < game.getBoard().getSize(); j++) {
+            int x = j * boxSize + boxSize / 2;
+            g.drawString(String.valueOf(j + 1), x, 15);
+        }
+    }
 }
-
-

@@ -3,7 +3,7 @@ package domain;
 import java.io.Serializable;
 
 /**
- * The board class represents the game board in the Quoridor game.
+ * The Board class represents the game board in the Quoridor game.
  */
 public class board implements Serializable {
 
@@ -51,21 +51,33 @@ public class board implements Serializable {
         return size;
     }
 
-    public box[][] getBoxes(){
+    /**
+     * Gets the array of boxes representing the board.
+     * 
+     * @return The array of boxes representing the board.
+     */
+    public box[][] getBoxes() {
         return boxes;
     }
 
-    public void setSpecialBox(box box){
-        boxes[box.getRow()][box.getColumn()]=box;
+    /**
+     * Sets a special box at the specified position on the board.
+     * 
+     * @param box The box to be set as special.
+     */
+    public void setSpecialBox(box box) {
+        boxes[box.getRow()][box.getColumn()] = box;
     }
 
-    public void comprobeBarrier(){
+    /**
+     * Checks for barriers on all boxes of the board and updates their states accordingly.
+     */
+    public void comprobeBarrier() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                box box=boxes[i][j];
+                box box = boxes[i][j];
                 box.comprobeBarrier();
             }        
         }
-
     }
 }

@@ -925,47 +925,56 @@ private void optionSave() {
 
     private void submitConfiguration() {
         try {
-            normalBarriers = Integer.parseInt(normalBarriersField.getText());
-            temporaryBarriers = Integer.parseInt(temporaryBarriersField.getText());
-            longBarriers = Integer.parseInt(longBarriersField.getText());
-            alliedBarriers = Integer.parseInt(alliedBarriersField.getText());
-            totalSpecialTiles = Integer.parseInt(totalSpecialTilesField.getText());
-
-
+            normalBarriers = parseOrDefault(normalBarriersField.getText(), 0);
+            temporaryBarriers = parseOrDefault(temporaryBarriersField.getText(), 0);
+            longBarriers = parseOrDefault(longBarriersField.getText(), 0);
+            alliedBarriers = parseOrDefault(alliedBarriersField.getText(), 0);
+            totalSpecialTiles = parseOrDefault(totalSpecialTilesField.getText(), 0);
+    
             int sumOfSpecialTiles = 0;
             for (int i = 0; i < specialTileCheckBoxes.size(); i++) {
                 JCheckBox checkBox = specialTileCheckBoxes.get(i);
                 if (checkBox.isSelected()) {
-                    int quantity = Integer.parseInt(specialTileQuantityFields.get(i).getText());
+                    int quantity = parseOrDefault(specialTileQuantityFields.get(i).getText(), 0);
                     sumOfSpecialTiles += quantity;
-                    String type = checkBox.getText();
                 }
             }
-
-            size = Integer.parseInt(boardSizeJField.getText());
-            goBack=Integer.parseInt(goBackField.getText());
-            doubleShift=Integer.parseInt(doubleShiftField.getText());
-            teleporter= Integer.parseInt(teleporterField.getText());
-            star= Integer.parseInt(starField.getText());
-            
-        
-
+    
+            size = parseOrDefault(boardSizeJField.getText(), 0);
+            goBack = parseOrDefault(goBackField.getText(), 0);
+            doubleShift = parseOrDefault(doubleShiftField.getText(), 0);
+            teleporter = parseOrDefault(teleporterField.getText(), 0);
+            star = parseOrDefault(starField.getText(), 0);
+    
+            // Validaciones
             if (sumOfSpecialTiles != totalSpecialTiles) {
                 JOptionPane.showMessageDialog(this, "The total quantity of special tiles does not match the specified total.");
-            }
-            else if(star>(totalSpecialTiles*0.2)){
-                JOptionPane.showMessageDialog(this, "The total of stars cant be 20% than totally specials.");
-            }
-            else {
-
-
-                CardLayout cl = (CardLayout) principal.getLayout();
+            } else if (star > (totalSpecialTiles * 0.2)) {
+                JOptionPane.showMessageDialog(this, "The total of stars can't be more than 20% of the total special tiles.");
+            } else {
+                int totalBarriers = normalBarriers + temporaryBarriers + longBarriers + alliedBarriers;
+                if (totalBarriers > size + 1) {
+                    JOptionPane.showMessageDialog(this, "The total number of barriers cannot exceed the size of the board plus one.");
+                } else {
+                    // Cambiar a la siguiente pantalla
+                    CardLayout cl = (CardLayout) principal.getLayout();
                     cl.show(principal, "setPlayers");
+                }
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for all barriers and special tiles.");
         }
     }
+    
+    // Método auxiliar para parsear un número o devolver un valor por defecto si el campo está vacío o es inválido
+    private int parseOrDefault(String text, int defaultValue) {
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+    
     
 
     private void showGameBoardScreen() {
@@ -1021,15 +1030,6 @@ private void optionSave() {
         return button;
     }
     
-    private void updateGameBoardUI() {
-        // Actualizar la interfaz de juego según el estado del juego cargado
-        // Por ejemplo, puedes actualizar la posición de los jugadores, las barreras, etc.
-    
-        // Llamar a revalidate() y repaint() para asegurarse de que los cambios se apliquen
-        gameBoardPanel.revalidate();
-        gameBoardPanel.repaint();
-    }
-
     
     
     public static void main(String args[]){
