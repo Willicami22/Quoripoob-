@@ -141,7 +141,7 @@ public class QuoridorGame implements Serializable {
      */
     private void validatePlayerIndex() throws QuoripoobException {
         if (actualPlayer < 0 || actualPlayer >= players.length) {
-            throw new QuoripoobException("Invalid player index.");
+            throw new QuoripoobException(QuoripoobException.OutOfIndex);
         }
     }
     
@@ -154,7 +154,8 @@ public class QuoridorGame implements Serializable {
     private void validateNewPosition(int[] newPosition) throws QuoripoobException {
         int boardSize = board.getSize();
         if (newPosition[0] < 0 || newPosition[1] >= boardSize || newPosition[1] < 0 || newPosition[0] >= boardSize) {
-            throw new QuoripoobException("Invalid move.");
+            
+            throw new QuoripoobException(QuoripoobException.OutOfBoard);
         }
     }
     
@@ -193,9 +194,9 @@ public class QuoridorGame implements Serializable {
      */
     private void validateFinalPosition(int[] newPosition, String direction, playerTab currentPlayer, box currentBox) throws QuoripoobException {
         if (isDiagonalDirection(direction) && comprobePlayer(newPosition[0], newPosition[1])) {
-            throw new QuoripoobException("Invalid Move.");
+            throw new QuoripoobException(QuoripoobException.InvalidMove);
         } else if (!isValidMove(newPosition[0], newPosition[1], direction, currentPlayer.isStar()) && !(currentBox instanceof teleporter)) {
-            throw new QuoripoobException("Invalid Move");
+            throw new QuoripoobException(QuoripoobException.InvalidMove);
         }
     }
     
@@ -253,7 +254,7 @@ public class QuoridorGame implements Serializable {
                 currentPlayer.setCurrentBox(lastSecondBox);
             }
         } else {
-            throw new QuoripoobException("Not enough movements to go back.");
+            throw new QuoripoobException(QuoripoobException.GoBack);
         }
     }
     
@@ -382,7 +383,7 @@ public class QuoridorGame implements Serializable {
      * @param direction The input direction.
      * @return The opposite direction.
      */
-    public String getOppositeDirection(String direction) {
+    public String getOppositeDirection(String direction) throws QuoripoobException{
         switch (direction) {
             case "N":
                 return "S";  // Moving north has the opposite direction of south
@@ -402,7 +403,7 @@ public class QuoridorGame implements Serializable {
             case "SW":
                 return "NE";  // Mover hacia el suroeste tiene la dirección opuesta hacia el noreste
             default:
-                throw new IllegalArgumentException("Dirección no válida: " + direction);  // Manejo de dirección inválida
+                throw new QuoripoobException(QuoripoobException.InvalidDirection);  // Manejo de dirección inválida
         }
     }
     
@@ -447,7 +448,7 @@ public int[] obtainNewPosition(String direction, int[] newPosition) throws Quori
             newPosition[1]--;  // Moving southwest decrements the Y coordinate
             break;
         default:
-            throw new QuoripoobException("Invalid direction.");
+            throw new QuoripoobException(QuoripoobException.InvalidDirection);
     }
     return newPosition;
 }
@@ -465,7 +466,7 @@ public void putBarrier(int rowInit, int columnInit, String orientation, String t
     if (getActualPlayer().getNumberBarrier(type) > 0) {
 
         if (!isValidBarrierPlacement(rowInit, columnInit, orientation, type)) {
-            throw new QuoripoobException("Invalid barrier placement");
+            throw new QuoripoobException(QuoripoobException.InvalidPlaceBarrier);
         }
         barrier barrier = createBarrier(type, orientation);
 
@@ -485,7 +486,7 @@ public void putBarrier(int rowInit, int columnInit, String orientation, String t
             playMachine();
         }
     } else {
-        throw new QuoripoobException("You don't have more barriers of this type.");
+        throw new QuoripoobException(QuoripoobException.DontHaveBarriers);
     }
 }
 
@@ -515,7 +516,7 @@ private boolean isValidBarrierPlacement(int rowInit, int columnInit, String orie
  * @param orientation The orientation of the barrier.
  * @return The created barrier object.
  */
-public barrier createBarrier(String type, String orientation) {
+private barrier createBarrier(String type, String orientation) {
     if (type.equals("Large")) {
         return new large(true);
     } else if (type.equals("Allied")) {
@@ -536,7 +537,7 @@ public barrier createBarrier(String type, String orientation) {
  * @param orientation The orientation of the barrier ("H" for horizontal, "V" for vertical).
  * @throws QuoripoobException If the orientation is invalid.
  */
-public void setBarrier(int rowInit, int columnInit, barrier barrier, String orientation) throws QuoripoobException {
+private void setBarrier(int rowInit, int columnInit, barrier barrier, String orientation) throws QuoripoobException {
 
     if (orientation.equals("H")) {
         board.getBox(rowInit, columnInit).placeBarrier(barrier, "N");
@@ -562,7 +563,7 @@ public void setBarrier(int rowInit, int columnInit, barrier barrier, String orie
             ((temporary) barrier).updateBox(board.getBox(rowInit, columnInit), board.getBox(rowInit, columnInit + 1), board.getBox(rowInit - 1, columnInit), board.getBox(rowInit - 1, columnInit + 1));
         }
     } else {
-        throw new QuoripoobException("Invalid orientation");
+        throw new QuoripoobException(QuoripoobException.InvalidDirection);
     }
 
 }
@@ -577,7 +578,7 @@ public void setBarrier(int rowInit, int columnInit, barrier barrier, String orie
  * @param barrier The barrier object to erase.
  * @throws QuoripoobException If the barrier cannot be erased due to blocking a player's path.
  */
-public void eraseBarrier(String orientation, int rowInit, int columnInit, barrier barrier) throws QuoripoobException {
+private void eraseBarrier(String orientation, int rowInit, int columnInit, barrier barrier) throws QuoripoobException {
     if (orientation.equals("H")) {
         board.getBox(rowInit, columnInit).eraseBarrier("N");
         board.getBox(rowInit, columnInit + 1).eraseBarrier("N");
@@ -597,7 +598,7 @@ public void eraseBarrier(String orientation, int rowInit, int columnInit, barrie
             board.getBox(rowInit + 2, columnInit - 1).eraseBarrier("W");
         }
     }
-    throw new QuoripoobException("The path blocks the player");
+    throw new QuoripoobException(QuoripoobException.PathBlocked);
 }
 
 /**
@@ -609,7 +610,7 @@ public void eraseBarrier(String orientation, int rowInit, int columnInit, barrie
  * @param type The type of the barrier.
  * @return true if the placement is within limits, false otherwise.
  */
-public boolean checkLimits(int rowInit, int columnInit, String orientation, String type) {
+private boolean checkLimits(int rowInit, int columnInit, String orientation, String type) {
     int boardSize = board.getSize();
     if (rowInit < 0 || rowInit >= boardSize || columnInit < 0 || columnInit >= boardSize) {
         return false;
@@ -637,7 +638,7 @@ public boolean checkLimits(int rowInit, int columnInit, String orientation, Stri
  * @param type The type of the barrier.
  * @return true if there are no barriers in adjacent positions, false otherwise.
  */
-public boolean checkBarriers(String orientation, int rowInit, int columnInit, String type) {
+private boolean checkBarriers(String orientation, int rowInit, int columnInit, String type) {
     if (orientation.equals("H") && type != "Large") {
         return !board.getBox(rowInit - 1, columnInit).hasBarrier("S") &&
                !board.getBox(rowInit - 1, columnInit + 1).hasBarrier("S") &&
@@ -955,7 +956,7 @@ public boolean checkBarriers(String orientation, int rowInit, int columnInit, St
                 this.mode=importedQuoridor.mode;
                 this.players=importedQuoridor.players;
             } else {
-                throw new QuoripoobException("El archivo no contiene un jardín válido.");
+                throw new QuoripoobException("El archivo no contiene una partida válida.");
             }
         } catch (IOException e) {
             throw new QuoripoobException("Error al importar los datos: " + e.getMessage());

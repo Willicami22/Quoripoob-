@@ -795,9 +795,11 @@ public class QuoridorGUI extends JFrame {
             
             QuoridorBoard.repaint(); 
         } catch (NumberFormatException e) {
+            Log.record(e);
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for row and column.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
         } catch (QuoripoobException e) {
-            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            Log.record(e);
+            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
         }
     }
      
@@ -811,7 +813,8 @@ public class QuoridorGUI extends JFrame {
 
         }  
         catch(QuoripoobException e){
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error" + e.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
+            Log.record(e);
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error " + e.getMessage(), "Error  ", JOptionPane.ERROR_MESSAGE);
 
         }  
     }
@@ -837,6 +840,7 @@ public class QuoridorGUI extends JFrame {
                 cl.show(principal, "gameBoard");
     
             } catch (QuoripoobException ex) {
+                Log.record(ex);
                 JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al abrir el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
