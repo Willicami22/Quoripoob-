@@ -74,6 +74,10 @@ public class QuoridorGUI extends JFrame {
         prepareActions();
     }
 
+    /**
+     * Prepares the main elements of the GUI.
+     */
+
     private void prepareElements(){
 
         principal=new JPanel(new CardLayout());
@@ -94,6 +98,10 @@ public class QuoridorGUI extends JFrame {
 
         setLocationRelativeTo(null);
     }
+
+        /**
+     * Prepares the elements for the initial panel.
+     */
 
     private void prepareElementsInit(){
         initPanel= new JPanel(new GridBagLayout());
@@ -116,6 +124,10 @@ public class QuoridorGUI extends JFrame {
 
         initPanel.setSize(PREFERRED_DIMENSION);
     }
+
+    /**
+     * Prepares the elements for the special tiles configuration panel.
+     */
     
     private void prepareElementsSpecials() {
         choseSpecials = new JPanel(new GridBagLayout());
@@ -185,6 +197,15 @@ public class QuoridorGUI extends JFrame {
             }
         });
     }
+
+    /**
+     * Adds a labeled text field to a panel with specific constraints.
+     * @param panel The panel to add the field to.
+     * @param gbc The grid bag constraints.
+     * @param row The row number.
+     * @param labelText The label text.
+     * @param textField The text field.
+     */
     
     private void addLabeledField(JPanel panel, GridBagConstraints gbc, int row, String labelText, JTextField textField) {
         gbc.gridy = row;
@@ -194,6 +215,9 @@ public class QuoridorGUI extends JFrame {
         panel.add(textField, gbc);
     }
     
+      /**
+     * Prepares the elements for the opponent selection panel.
+     */
 
     private void prepareElementsOpponent(){
 
@@ -215,6 +239,9 @@ public class QuoridorGUI extends JFrame {
         choseOpponent.setSize(PREFERRED_DIMENSION);
     }
 
+      /**
+     * Prepares the elements for the difficult selection panel.
+     */
     private void prepareElementsDifficult(){
         
         choseDifficult= new JPanel();
@@ -237,6 +264,11 @@ public class QuoridorGUI extends JFrame {
 
         choseDifficult.setSize(PREFERRED_DIMENSION);
     }
+
+
+      /**
+     * Prepares the elements for the mode selection panel.
+     */
 
     private void prepareElementsMode(){
         choseMode= new JPanel();
@@ -262,6 +294,10 @@ public class QuoridorGUI extends JFrame {
         choseMode.setSize(PREFERRED_DIMENSION);
 
     }
+
+     /**
+     * Prepares the elements for setting up the players.
+     */
 
     private void prepareElementsSetPlayers() {
         setPlayers = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -359,6 +395,10 @@ public class QuoridorGUI extends JFrame {
         });
     }
     
+
+    /**
+     * Prepares the elements for the game board.
+     */
     private void prepareElementsGameBoard() {
         gameBoardPanel = new JPanel(new BorderLayout());
 
@@ -781,155 +821,161 @@ public class QuoridorGUI extends JFrame {
 
     private void putBarrierAction() {
         try {
+            // Retrieve the row and column values from text fields
             int row = Integer.parseInt(rowTextField.getText());
             int column = Integer.parseInt(columnTextField.getText());
+            
+            // Retrieve the orientation and type from combo boxes
             String orientation = (String) directionComboBox.getSelectedItem();
-            String type=(String) typeComboBox.getSelectedItem();
-            
-
+            String type = (String) typeComboBox.getSelectedItem();
+    
+            // Place the barrier based on the orientation
             if ("Horizontal".equals(orientation)) {
-                Quoripoob.putBarrier(row, column, "H",type);
+                Quoripoob.putBarrier(row, column, "H", type);
             } else {
-                Quoripoob.putBarrier(row, column, "V",type);
+                Quoripoob.putBarrier(row, column, "V", type);
             }
-            
-            QuoridorBoard.repaint(); 
+    
+            // Repaint the board to reflect the changes
+            QuoridorBoard.repaint();
         } catch (NumberFormatException e) {
+            // Log the error and show a message if row or column inputs are not valid numbers
             Log.record(e);
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for row and column.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
         } catch (QuoripoobException e) {
+            // Log the error and show a message if there is an issue placing the barrier
             Log.record(e);
-            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Unable to place barrier: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-     
-
-
-    private void moveAction(String direction){
-
-        try{
+    
+    private void moveAction(String direction) {
+        try {
+            // Move the tab in the given direction
             Quoripoob.moveTab(direction);
+            // Repaint the board to reflect the changes
             QuoridorBoard.repaint();
-
-        }  
-        catch(QuoripoobException e){
+        } catch (QuoripoobException e) {
+            // Log the error and show a message if there is an issue with the move
             Log.record(e);
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error " + e.getMessage(), "Error  ", JOptionPane.ERROR_MESSAGE);
-
-        }  
+            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
-
-    private void newGameAction(){
-
+    
+    private void newGameAction() {
+        // Switch to the panel where the user can choose an opponent
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseOpponent");
-        
+        cl.show(principal, "choseOpponent");
     }
-
+    
     private void continueGameAction() {
+        // Open a file chooser dialog
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(QuoridorGUI.this);
         if (result == JFileChooser.APPROVE_OPTION) {
+            // Get the selected file
             File selectedFile = fileChooser.getSelectedFile();
             try {
-                // Cargar el estado del juego desde el archivo
+                // Load the game state from the file
                 QuoridorGame loadedGame = QuoridorGame.open(selectedFile);
     
-                // Validar el juego cargado
+                // Validate the loaded game
                 if (loadedGame == null || loadedGame.getBoard() == null) {
-                    throw new QuoripoobException("El archivo no contiene un estado de juego válido.");
+                    throw new QuoripoobException("The file does not contain a valid game state.");
                 }
     
-                // Asignar el juego cargado a la variable global de juego
+                // Assign the loaded game to the global game variable
                 Quoripoob = loadedGame;
     
-                // Actualizar la instancia de QuoridorBoard con el nuevo juego
-                QuoridorBoard board= (QuoridorBoard) QuoridorBoard;
+                // Update the instance of QuoridorBoard with the new game
+                QuoridorBoard board = (QuoridorBoard) QuoridorBoard;
                 board.updateBoard(loadedGame);
     
-                // Actualizar los nombres y colores de los jugadores
+                // Update the names and colors of the players
                 player1Label.setText(Quoripoob.getPlayers()[0].getName());
                 player2Label.setText(Quoripoob.getPlayers()[1].getName());
                 selectedColorButton1.setBackground(Quoripoob.getPlayers()[0].getColor());
                 selectedColorButton2.setBackground(Quoripoob.getPlayers()[1].getColor());
     
-                // Cambiar al panel de juego (gameBoard)
+                // Switch to the game panel (gameBoard)
                 CardLayout cl = (CardLayout) (principal.getLayout());
                 cl.show(principal, "gameBoard");
     
-                // Refrescar el panel de juego
+                // Refresh the game panel
                 gameBoardPanel.revalidate();
                 gameBoardPanel.repaint();
-                
+    
             } catch (QuoripoobException ex) {
+                // Log the error and show a message if there is an issue loading the game
                 Log.record(ex);
-                JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al abrir el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Error opening the file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
     
 
-
-
-private void optionSave() {
-    JFileChooser fileChooser = new JFileChooser();
-    int result = fileChooser.showSaveDialog(QuoridorGUI.this);
-    if (result == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        try {
-            Quoripoob.save(selectedFile);
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Partida guardada correctamente!");
-        } catch (QuoripoobException ex) {
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            Log.record(ex); 
-        } catch (SecurityException ex) {
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Se ha denegado el acceso al archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            Log.record(ex); // Registra la excepción en el registro de errores
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(QuoridorGUI.this, "Error desconocido al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            Log.record(ex); // Registra la excepción en el registro de errores
+    private void optionSave() {
+        // Create a file chooser dialog for saving the game
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showSaveDialog(QuoridorGUI.this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // Get the selected file
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                // Save the game to the selected file
+                Quoripoob.save(selectedFile);
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Partida guardada correctamente!");
+            } catch (QuoripoobException ex) {
+                // Show error message if there is an issue saving the game
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Error al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                Log.record(ex); // Log the exception
+            } catch (SecurityException ex) {
+                // Show error message if there is a security issue
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Se ha denegado el acceso al archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                Log.record(ex); // Log the exception
+            } catch (Exception ex) {
+                // Show error message for any other unknown issues
+                JOptionPane.showMessageDialog(QuoridorGUI.this, "Error desconocido al guardar la partida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                Log.record(ex); // Log the exception
+            }
         }
     }
-}
-
- 
-
-    private void setPlayer(String Opponent){
-
+    
+    private void setPlayer(String Opponent) {
+        // Set the player based on the opponent type
         Quoripoob.setPlayer(Opponent);
-        if (Opponent=="M"){
-            CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseDifficult");
-        }
-        else{
-            CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseMode");
+        CardLayout cl = (CardLayout) (principal.getLayout());
+        if (Opponent == "M") {
+            // Show difficulty selection if the opponent is "M"
+            cl.show(principal, "choseDifficult");
+        } else {
+            // Show mode selection otherwise
+            cl.show(principal, "choseMode");
         }
     }
- 
-
-    private void setDifficult(String difficult){
-
+    
+    private void setDifficult(String difficult) {
+        // Set the difficulty level
         Quoripoob.setDifficult(difficult);
+        // Show the mode selection screen
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseMode");
-
+        cl.show(principal, "choseMode");
     }
-
-    private void setMode(String mode){
-
+    
+    private void setMode(String mode) {
+        // Set the game mode
         Quoripoob.setMode(mode);
+        // Show the special tiles selection screen
         CardLayout cl = (CardLayout) (principal.getLayout());
-                cl.show(principal, "choseSpecials");
-
+        cl.show(principal, "choseSpecials");
     }
-
+    
     private void checkReady() {
         if (player1Ready && player2Ready) {
             String player1Name = name1.getText().trim();
             String player2Name = name2.getText().trim();
     
-            // Check if names are empty or identical
+            // Validate player names
             if (player1Name.isEmpty() || player2Name.isEmpty()) {
                 player1Ready = false;
                 player2Ready = false;
@@ -940,11 +986,11 @@ private void optionSave() {
             if (player1Name.equals(player2Name)) {
                 player1Ready = false;
                 player2Ready = false;
-                JOptionPane.showMessageDialog(this, "Player names cannot be identical.", "Error",   JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Player names cannot be identical.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
     
-            // Check if colors are selected or identical
+            // Validate player colors
             if (player1Color == null || player2Color == null) {
                 player1Ready = false;
                 player2Ready = false;
@@ -959,10 +1005,10 @@ private void optionSave() {
                 return;
             }
     
-            // If everything is correct, configure the game
+            // Configure the game
             namePlayer1 = player1Name;
             namePlayer2 = player2Name;
-            Quoripoob.setBoard(size); 
+            Quoripoob.setBoard(size);
             Quoripoob.setPlayers(0, player1Name, player1Color);
             Quoripoob.setPlayers(1, player2Name, player2Color);
             Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter, star);
@@ -970,19 +1016,21 @@ private void optionSave() {
     
             JOptionPane.showMessageDialog(this, "Configuration set successfully!");
     
+            // Show the game board screen
             showGameBoardScreen();
         }
     }
     
-
     private void submitConfiguration() {
         try {
+            // Parse barrier and special tile values from text fields
             normalBarriers = parseOrDefault(normalBarriersField.getText(), 0);
             temporaryBarriers = parseOrDefault(temporaryBarriersField.getText(), 0);
             longBarriers = parseOrDefault(longBarriersField.getText(), 0);
             alliedBarriers = parseOrDefault(alliedBarriersField.getText(), 0);
             totalSpecialTiles = parseOrDefault(totalSpecialTilesField.getText(), 0);
     
+            // Calculate the sum of special tiles
             int sumOfSpecialTiles = 0;
             for (int i = 0; i < specialTileCheckBoxes.size(); i++) {
                 JCheckBox checkBox = specialTileCheckBoxes.get(i);
@@ -992,13 +1040,14 @@ private void optionSave() {
                 }
             }
     
+            // Parse additional configuration values
             size = parseOrDefault(boardSizeJField.getText(), 0);
             goBack = parseOrDefault(goBackField.getText(), 0);
             doubleShift = parseOrDefault(doubleShiftField.getText(), 0);
             teleporter = parseOrDefault(teleporterField.getText(), 0);
             star = parseOrDefault(starField.getText(), 0);
     
-            // Validaciones
+            // Validate the configuration
             if (sumOfSpecialTiles != totalSpecialTiles) {
                 JOptionPane.showMessageDialog(this, "The total quantity of special tiles does not match the specified total.");
             } else if (star > (totalSpecialTiles * 0.2)) {
@@ -1008,17 +1057,18 @@ private void optionSave() {
                 if (totalBarriers > size + 1) {
                     JOptionPane.showMessageDialog(this, "The total number of barriers cannot exceed the size of the board plus one.");
                 } else {
-                    // Cambiar a la siguiente pantalla
+                    // Show the player setup screen
                     CardLayout cl = (CardLayout) principal.getLayout();
                     cl.show(principal, "setPlayers");
                 }
             }
         } catch (NumberFormatException e) {
+            // Show error message if any number parsing fails
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for all barriers and special tiles.");
         }
     }
     
-    // Método auxiliar para parsear un número o devolver un valor por defecto si el campo está vacío o es inválido
+    // Helper method to parse a number or return a default value if the field is empty or invalid
     private int parseOrDefault(String text, int defaultValue) {
         try {
             return Integer.parseInt(text);
@@ -1027,66 +1077,34 @@ private void optionSave() {
         }
     }
     
-    
-
     private void showGameBoardScreen() {
-    
+        // Show the game board screen
         CardLayout cl = (CardLayout) principal.getLayout();
         cl.show(principal, "gameBoard");
     }
-
-    private void giveUpAction(){
+    
+    private void giveUpAction() {
+        // Give up the current game and reset
         Quoripoob.giveUp();
-            CardLayout cl = (CardLayout) principal.getLayout();
-            cl.show(principal, "initPanel");
-        Quoripoob= new QuoridorGame();
+        CardLayout cl = (CardLayout) principal.getLayout();
+        cl.show(principal, "initPanel");
+        Quoripoob = new QuoridorGame();
     }
-
-    public String getColorName(Color color) {
-    if (color.equals(Color.BLACK)) {
-        return "Negro";
-    } else if (color.equals(Color.BLUE)) {
-        return "Azul";
-    } else if (color.equals(Color.CYAN)) {
-        return "Cian";
-    } else if (color.equals(Color.DARK_GRAY)) {
-        return "Gris Oscuro";
-    } else if (color.equals(Color.GRAY)) {
-        return "Gris";
-    } else if (color.equals(Color.GREEN)) {
-        return "Verde";
-    } else if (color.equals(Color.LIGHT_GRAY)) {
-        return "Gris Claro";
-    } else if (color.equals(Color.MAGENTA)) {
-        return "Magenta";
-    } else if (color.equals(Color.ORANGE)) {
-        return "Naranja";
-    } else if (color.equals(Color.PINK)) {
-        return "Rosado";
-    } else if (color.equals(Color.RED)) {
-        return "Rojo";
-    } else if (color.equals(Color.WHITE)) {
-        return "Blanco";
-    } else if (color.equals(Color.YELLOW)) {
-        return "Amarillo";
-    } else {
-        return "Desconocido";
-    }
-}
-
+    
     private static JButton createButtonWithArrow(String arrow) {
+        // Create a button with a Unicode arrow character
         JButton button = new JButton(arrow);
-        button.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24)); // Seleccionar una fuente que soporte los caracteres Unicode
-        button.setFocusPainted(false); // Eliminar el borde alrededor del texto
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Establecer un borde
+        button.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24)); // Select a font that supports Unicode characters
+        button.setFocusPainted(false); // Remove the focus border around the text
+        button.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Set a border
         return button;
     }
     
-    
-    
-    public static void main(String args[]){
-        QuoridorGUI home=new QuoridorGUI();
+    public static void main(String args[]) {
+        // Create and display the Quoridor GUI
+        QuoridorGUI home = new QuoridorGUI();
         home.setVisible(true);
-    }    
+    }
 }
+    
 

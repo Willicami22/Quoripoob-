@@ -784,7 +784,8 @@ private boolean checkBarriers(String orientation, int rowInit, int columnInit, S
      */
     public void endGame(String cause){
         JOptionPane.showMessageDialog(null, "Game over. Thanks for playing!");
-        System.exit(0);    }
+        //System.exit(0);   
+     }
 
     /**
      * Retrieves the array of players.
