@@ -13,6 +13,7 @@ public class QuoripoobException extends Exception implements Serializable {
     public static final String InvalidPlaceBarrier="Invalid barrier placement";
     public static final String DontHaveBarriers="You don't have more barriers of this type.";
     public static final String PathBlocked="The path blocks the player";
+    public static final String NotValidSizeForBoard="Chose a realist size";
 
 
 

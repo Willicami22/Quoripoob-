@@ -42,6 +42,10 @@ public class QuoridorGame implements Serializable {
         return difficult;
     }
 
+    public String getMode(){
+        return mode;
+    }
+
     /**
      * Sets the player mode (human or machine).
      * 
@@ -58,10 +62,6 @@ public class QuoridorGame implements Serializable {
      */
     public void setMode(String mode) {
         this.mode = mode;
-    }
-
-    public String getMode(){
-        return mode;
     }
 
     /**
@@ -106,6 +106,7 @@ public class QuoridorGame implements Serializable {
      * @param size The size of the game board.
      */
     public void setBoard(int size) {
+        
         board = new board(size);
     }
 
@@ -565,7 +566,7 @@ private void setBarrier(int rowInit, int columnInit, barrier barrier, String ori
         board.getBox(rowInit + 1, columnInit - 1).placeBarrier(barrier, "E");
         if (barrier instanceof large) {
             board.getBox(rowInit + 2, columnInit - 1).placeBarrier(barrier, "E");
-            board.getBox(rowInit + 2, columnInit - 1).placeBarrier(barrier, "W");
+            board.getBox(rowInit + 2, columnInit ).placeBarrier(barrier, "W");
         } else if (barrier instanceof temporary) {
             ((temporary) barrier).updateBox(board.getBox(rowInit, columnInit), board.getBox(rowInit, columnInit + 1), board.getBox(rowInit - 1, columnInit), board.getBox(rowInit - 1, columnInit + 1));
         }

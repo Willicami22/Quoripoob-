@@ -962,7 +962,7 @@ private void optionSave() {
             // If everything is correct, configure the game
             namePlayer1 = player1Name;
             namePlayer2 = player2Name;
-            Quoripoob.setBoard(size);
+            Quoripoob.setBoard(size); 
             Quoripoob.setPlayers(0, player1Name, player1Color);
             Quoripoob.setPlayers(1, player2Name, player2Color);
             Quoripoob.distributeSpecialBoxes(goBack, doubleShift, teleporter, star);
