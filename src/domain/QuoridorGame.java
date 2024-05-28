@@ -15,7 +15,7 @@ public class QuoridorGame implements Serializable {
     private playerTab[] players; // Array to store players participating in the game.
     private board board; // Instance of the game board.
     private int actualPlayer; // Index of the currently active player.
-    private boolean vsMachine = true; // Flag indicating if the game is played against a machine or human.
+    public boolean vsMachine = true; // Flag indicating if the game is played against a machine or human.
     private String mode; // The game mode (e.g., "Single Player", "Multiplayer").
     private String difficult; // The difficulty level for the machine player.
     private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Array defining possible movement directions.
@@ -36,6 +36,14 @@ public class QuoridorGame implements Serializable {
      */
     public void setDifficult(String difficult) {
         this.difficult = difficult;
+    }
+
+    public String getDifficult(){
+        return difficult;
+    }
+
+    public String getMode(){
+        return mode;
     }
 
     /**
@@ -97,7 +105,7 @@ public class QuoridorGame implements Serializable {
      * 
      * @param size The size of the game board.
      */
-    public void setBoard(int size){
+    public void setBoard(int size) {
         
         board = new board(size);
     }
