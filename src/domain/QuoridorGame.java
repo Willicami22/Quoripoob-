@@ -158,7 +158,7 @@ public class QuoridorGame implements Serializable {
      * @param newPosition The new position to validate.
      * @throws QuoripoobException If the new position is out of bounds.
      */
-    private void validateNewPosition(int[] newPosition) throws QuoripoobException {
+    public void validateNewPosition(int[] newPosition) throws QuoripoobException {
         int boardSize = board.getSize();
         if (newPosition[0] < 0 || newPosition[1] >= boardSize || newPosition[1] < 0 || newPosition[0] >= boardSize) {
             
@@ -186,7 +186,7 @@ public class QuoridorGame implements Serializable {
      * @param direction The direction to check.
      * @return True if the direction is diagonal, false otherwise.
      */
-    private boolean isDiagonalDirection(String direction) {
+    public boolean isDiagonalDirection(String direction) {
         return direction.equals("SE") || direction.equals("SW") || direction.equals("NE") || direction.equals("NW");
     }
     
