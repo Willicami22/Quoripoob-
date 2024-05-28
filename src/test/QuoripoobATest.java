@@ -62,4 +62,55 @@ public class QuoripoobATest {
         assertNotNull(game.getWinner());
     }
 
+    @Test
+    public void testQuoridorGame2() throws QuoripoobException{
+        //Inicialización del juego
+        QuoridorGame game = new QuoridorGame();
+        game.setPlayer("H");
+        game.setMode("N");
+        game.setBoard(9); 
+        game.setPlayers(0, "Player 1", Color.YELLOW);
+        game.setPlayers(1, "Player 2", Color.CYAN);
+        game.setBarriers(5, 2, 1, 0); 
+
+        //Verificacicón información básica del juego
+        assertNotNull(game.getBoard());
+        assertEquals(2, game.getPlayers().length);
+        assertEquals(game.getMode(), "N");
+
+        playerTab player1 = game.getPlayers()[0];
+        playerTab player2 = game.getPlayers()[1];
+
+        //Verificación de la información de cada jugador
+        assertEquals("Player 1", player1.getName());
+        assertEquals("Player 2", player2.getName());
+        assertEquals(Color.YELLOW, player1.getColor());
+        assertEquals(Color.CYAN, player2.getColor());
+
+        //Verficación de la información de las barreras del jugador 1 y su comportamiento cuando se pone una barrera
+        assertEquals(player1.getNumberBarrier("Normal"), 5);
+        assertEquals(player1.getNumberBarrier("Allied"), 2);
+        assertEquals(player1.getNumberBarrier("Temporary"), 1);
+        assertEquals(player1.getNumberBarrier("Large"), 0);
+
+        game.putBarrier(5,5,"V","Normal");
+        assertEquals(player1.getNumberBarrier("Normal"), 4);
+
+        //Verificación de la cantidad de movimientos cuando se inicia el juego y después de mover una ficha
+        assertEquals(player2.getDirections().size(), 0);
+
+        game.moveTab("E");
+        assertEquals(player2.getDirections().size(), 1);
+        
+        //Verificación del turno
+        assertEquals(game.getActualPlayer(), player1);
+
+        game.moveTab("N");
+
+        assertEquals(game.getActualPlayer(), player2);
+
+        game.putBarrier(7, 7, "H", "Allied");
+
+        assertEquals(game.getActualPlayer(), player1);
+    }
 }
